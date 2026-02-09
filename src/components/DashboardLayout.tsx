@@ -21,6 +21,7 @@ export function DashboardLayout() {
   const navigation = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Students', path: '/students', icon: UsersRound },
+    { name: 'Parents', path: '/parents', icon: UserCog },
     { name: 'Teachers', path: '/teachers', icon: Presentation },
     { name: 'Availability', path: '/availability', icon: Calendar },
     { name: 'Lesson Schedule', path: '/schedule', icon: BookOpen },
