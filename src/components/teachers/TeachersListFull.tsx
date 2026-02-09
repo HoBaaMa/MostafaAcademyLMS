@@ -27,6 +27,7 @@ type Teacher = {
   country: string;
   city: string;
   timezone: string;
+  googleMeetLink: string;
   assignments: StageSubjectPair[];
 };
 
@@ -51,6 +52,7 @@ export function TeachersListFull() {
       country: 'United States',
       city: 'New York',
       timezone: 'UTC-5 (EST)',
+      googleMeetLink: 'https://meet.google.com/abc123',
       assignments: [
         { stage: 'Grade 10', subject: 'Mathematics' },
         { stage: 'Grade 11', subject: 'Mathematics' },
@@ -66,6 +68,7 @@ export function TeachersListFull() {
       country: 'Saudi Arabia',
       city: 'Riyadh',
       timezone: 'UTC+3 (AST)',
+      googleMeetLink: 'https://meet.google.com/def456',
       assignments: [
         { stage: 'Grade 6', subject: 'Arabic Language' },
         { stage: 'Grade 7', subject: 'Arabic Language' },
@@ -80,6 +83,7 @@ export function TeachersListFull() {
       country: 'Singapore',
       city: 'Singapore',
       timezone: 'UTC+8 (SGT)',
+      googleMeetLink: 'https://meet.google.com/ghi789',
       assignments: [
         { stage: 'Grade 9', subject: 'English Language' },
         { stage: 'Grade 10', subject: 'English Language' },
@@ -451,6 +455,7 @@ export function TeachersListFull() {
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[140px]">Country</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[120px]">City</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[140px]">Timezone</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[200px]">Google Meet Link</th>
                   
                   {/* Assignment columns */}
                   {assignmentSlots.map(i => (
@@ -551,6 +556,20 @@ export function TeachersListFull() {
                           </select>
                         ) : (
                           <span className="text-gray-900">{teacher.timezone}</span>
+                        )}
+                      </td>
+
+                      {/* Google Meet Link */}
+                      <td className="px-4 py-3 text-sm">
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={getCellValue(teacher, 'googleMeetLink')}
+                            onChange={(e) => handleCellChange(teacher.id, 'googleMeetLink', e.target.value)}
+                            className="w-full px-2 py-1 border border-green-300 rounded focus:ring-2 focus:ring-green-500 text-sm"
+                          />
+                        ) : (
+                          <span className="text-gray-900">{teacher.googleMeetLink}</span>
                         )}
                       </td>
 

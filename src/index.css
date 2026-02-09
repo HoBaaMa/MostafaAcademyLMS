@@ -853,6 +853,10 @@
     min-width: 180px;
   }
 
+  .min-w-\[200px\] {
+    min-width: 200px;
+  }
+
   .min-w-max {
     min-width: max-content;
   }
