@@ -300,7 +300,7 @@ export function TeachersListFull() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Presentation className="size-6 text-green-600" />
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Teachers - Full Data Grid</h1>
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Teachers</h1>
             </div>
             <p className="text-gray-600">View and edit all teacher information and teaching assignments</p>
           </div>

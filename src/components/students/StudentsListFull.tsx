@@ -11,7 +11,8 @@ import {
   Save,
   X,
   AlertCircle,
-  Check
+  Check,
+  Plus
 } from 'lucide-react';
 
 type Student = {
@@ -271,10 +272,18 @@ export function StudentsListFull() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <UsersRound className="size-6 text-blue-600" />
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Students - Full Data Grid</h1>
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Students</h1>
             </div>
             <p className="text-gray-600">View and edit all student information inline</p>
           </div>
+          
+          <Link
+            to="/students/new"
+            className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+          >
+            <Plus className="size-4" />
+            Add Student
+          </Link>
         </div>
 
         {/* Stats */}
