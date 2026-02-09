@@ -11,7 +11,7 @@ import { AvailabilityManagement } from "./components/AvailabilityManagement";
 import { TeacherRegistration } from "./components/TeacherRegistration";
 import { StudentsListFull } from "./components/students/StudentsListFull";
 import { StudentDetails } from "./components/students/StudentDetails";
-import { TeachersList } from "./components/teachers/TeachersList";
+import { TeachersListFull } from "./components/teachers/TeachersListFull";
 import { TeacherDetails } from "./components/teachers/TeacherDetails";
 import { ParentsList } from "./components/parents/ParentsList";
 import { ParentDetails } from "./components/parents/ParentDetails";
@@ -32,7 +32,7 @@ export const router = createBrowserRouter([
       { path: "parents", Component: ParentsList },
       { path: "parents/new", Component: ParentRegistration },
       { path: "parents/:id", Component: ParentDetails },
-      { path: "teachers", Component: TeachersList },
+      { path: "teachers", Component: TeachersListFull },
       { path: "teachers/new", Component: TeacherRegistration },
       { path: "teachers/:id", Component: TeacherDetails },
       { path: "availability", Component: AvailabilityManagement },
