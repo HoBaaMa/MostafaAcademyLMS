@@ -9,7 +9,7 @@ import { LessonSchedule } from "./components/LessonSchedule";
 import { ParentRegistration } from "./components/ParentRegistration";
 import { AvailabilityManagement } from "./components/AvailabilityManagement";
 import { TeacherRegistration } from "./components/TeacherRegistration";
-import { StudentsList } from "./components/students/StudentsList";
+import { StudentsListFull } from "./components/students/StudentsListFull";
 import { StudentDetails } from "./components/students/StudentDetails";
 import { TeachersList } from "./components/teachers/TeachersList";
 import { TeacherDetails } from "./components/teachers/TeacherDetails";
@@ -24,7 +24,7 @@ export const router = createBrowserRouter([
     Component: DashboardLayout,
     children: [
       { index: true, Component: DashboardHome },
-      { path: "students", Component: StudentsList },
+      { path: "students", Component: StudentsListFull },
       { path: "students/new", Component: StudentRegistration },
       { path: "students/:id", Component: StudentDetails },
       { path: "students/:id/availability", Component: StudentAvailability },
