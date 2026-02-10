@@ -5,7 +5,8 @@ import {
   Calendar, 
   BookOpen,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  Receipt
 } from 'lucide-react';
 
 export function DashboardHome() {
@@ -156,6 +157,18 @@ export function DashboardHome() {
               className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
               View Schedule
+            </Link>
+            <Link
+              to="/lessons/completed"
+              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              View Completed Lessons
+            </Link>
+            <Link
+              to="/payments"
+              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              View Payments
             </Link>
           </div>
         </div>

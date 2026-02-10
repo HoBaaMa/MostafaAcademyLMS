@@ -15,6 +15,10 @@ import { TeachersListFull } from "./components/teachers/TeachersListFull";
 import { TeacherDetails } from "./components/teachers/TeacherDetails";
 import { ParentsList } from "./components/parents/ParentsList";
 import { ParentDetails } from "./components/parents/ParentDetails";
+import { PaymentsList } from "./components/payments/PaymentsList";
+import { PaymentDetails } from "./components/payments/PaymentDetails";
+import { CompletedLessonsList } from "./components/lessons/CompletedLessonsList";
+import { CompletedLessonDetails } from "./components/lessons/CompletedLessonDetails";
 import { Finance } from "./components/Finance";
 import { Diagnostics } from "./components/Diagnostics";
 import { Settings } from "./components/Settings";
@@ -38,6 +42,10 @@ export const router = createBrowserRouter([
       { path: "availability", Component: AvailabilityManagement },
       { path: "matching", Component: MatchingScheduling },
       { path: "schedule", Component: LessonSchedule },
+      { path: "lessons/completed", Component: CompletedLessonsList },
+      { path: "lessons/completed/:id", Component: CompletedLessonDetails },
+      { path: "payments", Component: PaymentsList },
+      { path: "payments/:id", Component: PaymentDetails },
       { path: "finance", Component: Finance },
       { path: "diagnostics", Component: Diagnostics },
       { path: "settings", Component: Settings },

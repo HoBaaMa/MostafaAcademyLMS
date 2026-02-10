@@ -1,4 +1,5 @@
-import { DollarSign, TrendingUp, Receipt, CreditCard } from 'lucide-react';
+import { DollarSign, TrendingUp, Receipt, CreditCard, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router';
 
 export function Finance() {
   return (
@@ -52,10 +53,24 @@ export function Finance() {
           </div>
         </div>
 
+        {/* Quick Access to Payments */}
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center mb-6">
+          <Receipt className="size-16 text-blue-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Records</h3>
+          <p className="text-gray-600 mb-4">View and manage all payment transactions</p>
+          <Link
+            to="/payments"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            View All Payments
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
+
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <DollarSign className="size-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Finance Module</h3>
-          <p className="text-gray-600">Financial tracking and payment management coming soon</p>
+          <p className="text-gray-600">Advanced financial tracking and reporting coming soon</p>
         </div>
       </div>
     </div>

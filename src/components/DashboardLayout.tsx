@@ -12,7 +12,9 @@ import {
   Settings,
   Activity,
   UsersRound,
-  ChevronRight
+  ChevronRight,
+  Receipt,
+  CheckCircle
 } from 'lucide-react';
 
 export function DashboardLayout() {
@@ -25,6 +27,8 @@ export function DashboardLayout() {
     { name: 'Teachers', path: '/teachers', icon: Presentation },
     { name: 'Availability', path: '/availability', icon: Calendar },
     { name: 'Lesson Schedule', path: '/schedule', icon: BookOpen },
+    { name: 'Completed Lessons', path: '/lessons/completed', icon: CheckCircle },
+    { name: 'Payments', path: '/payments', icon: Receipt },
     { name: 'Finance', path: '/finance', icon: DollarSign },
     { name: 'Diagnostics', path: '/diagnostics', icon: Activity },
     { name: 'Settings', path: '/settings', icon: Settings },
