@@ -19,6 +19,7 @@ import { PaymentsList } from "./components/payments/PaymentsList";
 import { PaymentDetails } from "./components/payments/PaymentDetails";
 import { CompletedLessonsList } from "./components/lessons/CompletedLessonsList";
 import { CompletedLessonDetails } from "./components/lessons/CompletedLessonDetails";
+import { LessonDetails } from "./components/lessons/LessonDetails";
 import { Finance } from "./components/Finance";
 import { Diagnostics } from "./components/Diagnostics";
 import { Settings } from "./components/Settings";
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: "availability", Component: AvailabilityManagement },
       { path: "matching", Component: MatchingScheduling },
       { path: "schedule", Component: LessonSchedule },
+      { path: "lessons/:id", Component: LessonDetails },
       { path: "lessons/completed", Component: CompletedLessonsList },
       { path: "lessons/completed/:id", Component: CompletedLessonDetails },
       { path: "payments", Component: PaymentsList },
