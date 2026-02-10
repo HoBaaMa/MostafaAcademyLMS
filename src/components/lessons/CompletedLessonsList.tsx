@@ -7,14 +7,12 @@ import {
   ChevronLeft, 
   ChevronRight, 
   BookOpen,
-  Edit3,
-  Save,
-  X,
+  CheckCircle,
+  Lock,
+  ShieldCheck,
   AlertCircle,
-  Check,
-  UserCog,
   GraduationCap,
-  CheckCircle
+  UserCog
 } from 'lucide-react';
 
 type CompletedLesson = {
@@ -62,14 +60,11 @@ export function CompletedLessonsList() {
   const [priceMinFilter, setPriceMinFilter] = useState('');
   const [priceMaxFilter, setPriceMaxFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [editingRows, setEditingRows] = useState<Set<string>>(new Set());
-  const [editedData, setEditedData] = useState<Record<string, Partial<CompletedLesson>>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
   
   const itemsPerPage = 10;
 
   // Mock data - 12 completed lessons
-  const [lessons, setLessons] = useState<CompletedLesson[]>([
+  const lessons: CompletedLesson[] = [
     {
       id: 'LSN001234',
       studentId: 'MID102938',
@@ -406,7 +401,7 @@ export function CompletedLessonsList() {
       note: 'Scientific method and experiments',
       parentNo: 'PARENT104567'
     },
-  ]);
+  ];
 
   // Filter logic
   const filteredLessons = lessons.filter(lesson => {
@@ -441,103 +436,6 @@ export function CompletedLessonsList() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedLessons = filteredLessons.slice(startIndex, startIndex + itemsPerPage);
 
-  const toggleEditMode = (lessonId: string) => {
-    const newEditingRows = new Set(editingRows);
-    if (newEditingRows.has(lessonId)) {
-      newEditingRows.delete(lessonId);
-      const newEditedData = { ...editedData };
-      delete newEditedData[lessonId];
-      setEditedData(newEditedData);
-      
-      const newErrors = { ...errors };
-      Object.keys(newErrors).forEach(key => {
-        if (key.startsWith(lessonId)) {
-          delete newErrors[key];
-        }
-      });
-      setErrors(newErrors);
-    } else {
-      newEditingRows.add(lessonId);
-    }
-    setEditingRows(newEditingRows);
-  };
-
-  const handleCellChange = (lessonId: string, field: keyof CompletedLesson, value: any) => {
-    setEditedData({
-      ...editedData,
-      [lessonId]: {
-        ...editedData[lessonId],
-        [field]: value,
-      }
-    });
-
-    const errorKey = `${lessonId}-${field}`;
-    if (errors[errorKey]) {
-      const newErrors = { ...errors };
-      delete newErrors[errorKey];
-      setErrors(newErrors);
-    }
-  };
-
-  const getCellValue = (lesson: CompletedLesson, field: keyof CompletedLesson) => {
-    if (editedData[lesson.id] && field in editedData[lesson.id]) {
-      return editedData[lesson.id][field];
-    }
-    return lesson[field];
-  };
-
-  const validateChanges = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    Object.entries(editedData).forEach(([lessonId, data]) => {
-      if ('finalPrice' in data) {
-        const finalPrice = data.finalPrice as number;
-        if (finalPrice < 0) {
-          newErrors[`${lessonId}-finalPrice`] = 'Price cannot be negative';
-        }
-        if (isNaN(finalPrice)) {
-          newErrors[`${lessonId}-finalPrice`] = 'Must be a valid number';
-        }
-      }
-
-      if ('currency' in data) {
-        const currency = data.currency as string;
-        if (!CURRENCIES.includes(currency)) {
-          newErrors[`${lessonId}-currency`] = 'Invalid currency';
-        }
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSaveChanges = () => {
-    if (!validateChanges()) {
-      return;
-    }
-
-    const updatedLessons = lessons.map(lesson => {
-      if (editedData[lesson.id]) {
-        return { ...lesson, ...editedData[lesson.id] };
-      }
-      return lesson;
-    });
-
-    setLessons(updatedLessons);
-    setEditedData({});
-    setEditingRows(new Set());
-    setErrors({});
-  };
-
-  const handleDiscardChanges = () => {
-    setEditedData({});
-    setEditingRows(new Set());
-    setErrors({});
-  };
-
-  const hasChanges = Object.keys(editedData).length > 0;
-
   // Calculate stats
   const totalRevenue = lessons.reduce((sum, l) => sum + l.finalPrice, 0);
   const totalDiscounts = lessons.reduce((sum, l) => sum + (l.price - l.finalPrice), 0);
@@ -552,7 +450,26 @@ export function CompletedLessonsList() {
               <BookOpen className="size-6 text-green-600" />
               <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Completed Lessons</h1>
             </div>
-            <p className="text-gray-600">View and manage completed lesson records with financial data</p>
+            <p className="text-gray-600">Financial and operational report for completed lesson records</p>
+          </div>
+        </div>
+
+        {/* Read-Only Banner */}
+        <div className="bg-green-50 border-l-4 border-green-500 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <div className="size-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="size-5 text-green-700" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Lock className="size-4 text-green-700" />
+                <h3 className="font-semibold text-green-900">Financial Data - Read-Only</h3>
+              </div>
+              <p className="text-sm text-green-800">
+                Completed lessons are locked and cannot be modified to ensure financial integrity and audit compliance. 
+                All data is shown exactly as stored in the system. This report is for review, auditing, and reporting purposes only.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -562,21 +479,21 @@ export function CompletedLessonsList() {
             <p className="text-sm text-gray-600">Total Completed</p>
             <p className="text-2xl font-semibold text-gray-900">{lessons.length}</p>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-sm text-gray-600">Total Revenue</p>
-            <p className="text-2xl font-semibold text-green-700">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm text-green-700">Total Revenue</p>
+            <p className="text-2xl font-semibold text-green-900">
               ${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-sm text-gray-600">Total Discounts</p>
-            <p className="text-2xl font-semibold text-orange-700">
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <p className="text-sm text-orange-700">Total Discounts</p>
+            <p className="text-2xl font-semibold text-orange-900">
               ${totalDiscounts.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-sm text-gray-600">Editing</p>
-            <p className="text-2xl font-semibold text-blue-700">{editingRows.size}</p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-700">Showing</p>
+            <p className="text-2xl font-semibold text-blue-900">{filteredLessons.length}</p>
           </div>
         </div>
 
@@ -745,7 +662,10 @@ export function CompletedLessonsList() {
                   <tr>
                     {/* Frozen columns */}
                     <th className="sticky left-0 z-20 bg-gray-50 text-left px-4 py-3 text-xs font-medium text-gray-700 border-r-2 border-gray-300">
-                      Lesson ID
+                      <div className="flex items-center gap-1">
+                        Lesson ID
+                        <Lock className="size-3 text-gray-400" />
+                      </div>
                     </th>
                     <th className="sticky left-[120px] z-20 bg-gray-50 text-left px-4 py-3 text-xs font-medium text-gray-700 border-r-2 border-gray-300">
                       Student Name
@@ -778,11 +698,11 @@ export function CompletedLessonsList() {
                     {/* Status & Financial */}
                     <th className="bg-green-50 text-left px-4 py-3 text-xs font-medium text-gray-700">Status</th>
                     <th className="bg-yellow-50 text-right px-4 py-3 text-xs font-medium text-gray-700">Price</th>
-                    <th className="bg-yellow-50 text-right px-4 py-3 text-xs font-medium text-gray-700">Final Price ✏️</th>
-                    <th className="bg-yellow-50 text-left px-4 py-3 text-xs font-medium text-gray-700">Offer # ✏️</th>
-                    <th className="bg-yellow-50 text-left px-4 py-3 text-xs font-medium text-gray-700">Offer ID ✏️</th>
-                    <th className="bg-yellow-50 text-left px-4 py-3 text-xs font-medium text-gray-700">Currency ✏️</th>
-                    <th className="bg-yellow-50 text-left px-4 py-3 text-xs font-medium text-gray-700">Note ✏️</th>
+                    <th className="bg-yellow-50 text-right px-4 py-3 text-xs font-medium text-gray-700">Final Price</th>
+                    <th className="bg-yellow-50 text-left px-4 py-3 text-xs font-medium text-gray-700">Offer #</th>
+                    <th className="bg-yellow-50 text-left px-4 py-3 text-xs font-medium text-gray-700">Offer ID</th>
+                    <th className="bg-yellow-50 text-left px-4 py-3 text-xs font-medium text-gray-700">Currency</th>
+                    <th className="bg-yellow-50 text-left px-4 py-3 text-xs font-medium text-gray-700">Note</th>
                     <th className="bg-gray-100 text-left px-4 py-3 text-xs font-medium text-gray-700">Parent No</th>
                     
                     {/* Actions */}
@@ -793,20 +713,11 @@ export function CompletedLessonsList() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {paginatedLessons.map(lesson => {
-                    const isEditing = editingRows.has(lesson.id);
-                    const hasEdits = !!editedData[lesson.id];
-                    
                     return (
-                      <tr 
-                        key={lesson.id} 
-                        className={`hover:bg-gray-50 transition-colors ${hasEdits ? 'bg-green-50' : ''}`}
-                      >
+                      <tr key={lesson.id} className="hover:bg-gray-50 transition-colors">
                         {/* Frozen: Lesson ID */}
                         <td className="sticky left-0 z-10 bg-white px-4 py-3 border-r-2 border-gray-200 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs text-gray-900">{lesson.id}</span>
-                            {isEditing && <Edit3 className="size-3 text-green-600" />}
-                          </div>
+                          <span className="font-mono text-xs text-gray-900">{lesson.id}</span>
                         </td>
                         
                         {/* Frozen: Student Name */}
@@ -878,102 +789,42 @@ export function CompletedLessonsList() {
                           </span>
                         </td>
                         
-                        {/* Financial - Price (read-only) */}
+                        {/* Financial - Price */}
                         <td className="px-4 py-3 text-right whitespace-nowrap">
                           <span className="text-sm font-mono text-gray-700">
                             {lesson.price.toFixed(2)}
                           </span>
                         </td>
                         
-                        {/* Financial - Final Price (editable) */}
+                        {/* Financial - Final Price */}
                         <td className="px-4 py-3 text-right whitespace-nowrap">
-                          {isEditing ? (
-                            <div className="w-24">
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={getCellValue(lesson, 'finalPrice')}
-                                onChange={(e) => handleCellChange(lesson.id, 'finalPrice', parseFloat(e.target.value) || 0)}
-                                className={`w-full px-2 py-1 border rounded text-sm text-right font-mono ${
-                                  errors[`${lesson.id}-finalPrice`] ? 'border-red-500' : 'border-green-300'
-                                }`}
-                              />
-                              {errors[`${lesson.id}-finalPrice`] && (
-                                <p className="text-xs text-red-600 mt-1">{errors[`${lesson.id}-finalPrice`]}</p>
-                              )}
-                            </div>
-                          ) : (
-                            <span className={`text-sm font-mono font-semibold ${
-                              lesson.finalPrice === 0 ? 'text-orange-600' : 'text-gray-900'
-                            }`}>
-                              {lesson.finalPrice.toFixed(2)}
-                            </span>
-                          )}
+                          <span className={`text-sm font-mono font-semibold ${
+                            lesson.finalPrice === 0 ? 'text-orange-600' : 'text-gray-900'
+                          }`}>
+                            {lesson.finalPrice.toFixed(2)}
+                          </span>
                         </td>
                         
-                        {/* Offer Number (editable) */}
+                        {/* Offer Number */}
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              value={getCellValue(lesson, 'offerNumber')}
-                              onChange={(e) => handleCellChange(lesson.id, 'offerNumber', e.target.value)}
-                              className="w-32 px-2 py-1 border border-green-300 rounded text-xs"
-                              placeholder="Offer #..."
-                            />
-                          ) : (
-                            <span className="text-xs text-gray-700">{lesson.offerNumber || '—'}</span>
-                          )}
+                          <span className="text-xs text-gray-700">{lesson.offerNumber || '—'}</span>
                         </td>
                         
-                        {/* Applied Offer ID (editable) */}
+                        {/* Applied Offer ID */}
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              value={getCellValue(lesson, 'appliedOfferId')}
-                              onChange={(e) => handleCellChange(lesson.id, 'appliedOfferId', e.target.value)}
-                              className="w-32 px-2 py-1 border border-green-300 rounded text-xs font-mono"
-                              placeholder="OFFER..."
-                            />
-                          ) : (
-                            <span className="text-xs font-mono text-gray-700">{lesson.appliedOfferId || '—'}</span>
-                          )}
+                          <span className="text-xs font-mono text-gray-700">{lesson.appliedOfferId || '—'}</span>
                         </td>
                         
-                        {/* Currency (editable) */}
+                        {/* Currency */}
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <select
-                              value={getCellValue(lesson, 'currency')}
-                              onChange={(e) => handleCellChange(lesson.id, 'currency', e.target.value)}
-                              className="w-20 px-2 py-1 border border-green-300 rounded text-xs font-mono"
-                            >
-                              {CURRENCIES.map(curr => (
-                                <option key={curr} value={curr}>{curr}</option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 font-mono">
-                              {lesson.currency}
-                            </span>
-                          )}
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 font-mono">
+                            {lesson.currency}
+                          </span>
                         </td>
                         
-                        {/* Note (editable) */}
+                        {/* Note */}
                         <td className="px-4 py-3">
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              value={getCellValue(lesson, 'note')}
-                              onChange={(e) => handleCellChange(lesson.id, 'note', e.target.value)}
-                              className="w-48 px-2 py-1 border border-green-300 rounded text-xs"
-                              placeholder="Add note..."
-                            />
-                          ) : (
-                            <span className="text-xs text-gray-600 line-clamp-1">{lesson.note}</span>
-                          )}
+                          <span className="text-xs text-gray-600 line-clamp-1">{lesson.note}</span>
                         </td>
                         
                         {/* Parent No */}
@@ -984,29 +835,9 @@ export function CompletedLessonsList() {
                         {/* Actions */}
                         <td className="sticky right-0 z-10 bg-white px-4 py-3 border-l-2 border-gray-200 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => toggleEditMode(lesson.id)}
-                              className={`px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1 ${
-                                isEditing 
-                                  ? 'bg-green-100 text-green-700 hover:bg-green-200' 
-                                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-                              }`}
-                            >
-                              {isEditing ? (
-                                <>
-                                  <Check className="size-3" />
-                                  Done
-                                </>
-                              ) : (
-                                <>
-                                  <Edit3 className="size-3" />
-                                  Edit
-                                </>
-                              )}
-                            </button>
                             <Link
                               to={`/lessons/completed/${lesson.id}`}
-                              className="px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-xs font-medium flex items-center gap-1"
+                              className="px-3 py-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors text-xs font-medium flex items-center gap-1"
                             >
                               <Eye className="size-3" />
                               View
@@ -1046,7 +877,7 @@ export function CompletedLessonsList() {
 
           {/* Pagination */}
           {paginatedLessons.length > 0 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
               <p className="text-sm text-gray-600">
                 Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredLessons.length)} of {filteredLessons.length} lessons
               </p>
@@ -1075,54 +906,22 @@ export function CompletedLessonsList() {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Sticky Save/Discard Bar */}
-      {hasChanges && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-green-500 shadow-2xl z-50">
-          <div className="max-w-[1800px] mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="size-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <AlertCircle className="size-5 text-green-700" />
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Unsaved Changes</p>
-                  <p className="text-sm text-gray-600">
-                    {Object.keys(editedData).length} lesson{Object.keys(editedData).length > 1 ? 's' : ''} modified
-                  </p>
-                </div>
-              </div>
-
-              {Object.keys(errors).length > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg">
-                  <AlertCircle className="size-4 text-red-700" />
-                  <span className="text-sm text-red-700 font-medium">
-                    Please fix validation errors before saving
-                  </span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleDiscardChanges}
-                  className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
-                >
-                  <X className="size-4" />
-                  Discard
-                </button>
-                <button
-                  onClick={handleSaveChanges}
-                  className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
-                >
-                  <Save className="size-4" />
-                  Save Changes
-                </button>
-              </div>
+        {/* Read-Only Footer Note */}
+        <div className="bg-gray-100 border border-gray-300 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="size-5 text-gray-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-gray-700">
+              <p className="font-medium mb-1">Financial Record Integrity</p>
+              <p>
+                All completed lesson records are permanently locked to maintain financial accuracy and audit trail compliance. 
+                This data represents finalized transactions and cannot be altered. For any discrepancies or corrections, 
+                please contact your system administrator or use the appropriate financial adjustment procedures.
+              </p>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
