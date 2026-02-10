@@ -7,18 +7,13 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Calendar,
-  Edit3,
-  Save,
-  X,
-  AlertCircle,
-  Check,
-  Copy,
-  Ban,
   Clock,
   CheckCircle,
   XCircle,
-  AlertTriangle,
-  Info
+  Ban,
+  Lock,
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 
 type LessonStatus = 'Scheduled' | 'Completed' | 'Cancelled' | 'Trial_Done' | 'Trial_Canceled' | 'Paid_Cancelled';
@@ -46,18 +41,6 @@ type Lesson = {
   reason: string;
 };
 
-type Student = {
-  id: string;
-  name: string;
-  timeZone: string;
-};
-
-type Teacher = {
-  id: string;
-  name: string;
-  timeZone: string;
-};
-
 const SUBJECTS = ['Mathematics', 'Science', 'English', 'Arabic', 'Physics', 'Chemistry', 'Biology', 'Computer Science'];
 
 const STAGES = [
@@ -67,22 +50,6 @@ const STAGES = [
 ];
 
 const STATUSES: LessonStatus[] = ['Scheduled', 'Completed', 'Cancelled', 'Trial_Done', 'Trial_Canceled', 'Paid_Cancelled'];
-
-const MOCK_STUDENTS: Student[] = [
-  { id: 'MID102938', name: 'Ahmad Hassan', timeZone: 'America/Toronto (UTC-5)' },
-  { id: 'MID103456', name: 'Layla Ahmed', timeZone: 'Asia/Dubai (UTC+4)' },
-  { id: 'MID104567', name: 'Omar Ibrahim', timeZone: 'Africa/Cairo (UTC+2)' },
-  { id: 'MID105678', name: 'Maryam Khalil', timeZone: 'Europe/London (UTC+0)' },
-  { id: 'MID106789', name: 'Youssef Ali', timeZone: 'America/Toronto (UTC-5)' },
-];
-
-const MOCK_TEACHERS: Teacher[] = [
-  { id: 'TCHR001', name: 'Dr. Sarah Johnson', timeZone: 'America/New_York (UTC-5)' },
-  { id: 'TCHR002', name: 'Prof. Michael Chen', timeZone: 'America/Los_Angeles (UTC-8)' },
-  { id: 'TCHR003', name: 'Mrs. Fatima Al-Sayed', timeZone: 'Africa/Cairo (UTC+2)' },
-  { id: 'TCHR004', name: 'Dr. James Williams', timeZone: 'America/Toronto (UTC-5)' },
-  { id: 'TCHR005', name: 'Ms. Emily Davis', timeZone: 'Europe/London (UTC+0)' },
-];
 
 export function LessonSchedule() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,20 +63,11 @@ export function LessonSchedule() {
   const [dayNameFilter, setDayNameFilter] = useState('');
   const [activeTab, setActiveTab] = useState<'All' | LessonStatus>('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [editingRows, setEditingRows] = useState<Set<string>>(new Set());
-  const [editedData, setEditedData] = useState<Record<string, Partial<Lesson>>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [conflicts, setConflicts] = useState<Record<string, string>>({});
-  const [showConflictModal, setShowConflictModal] = useState(false);
-  const [conflictLesson, setConflictLesson] = useState<string | null>(null);
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [cancelLessonId, setCancelLessonId] = useState<string | null>(null);
-  const [cancelReason, setCancelReason] = useState('');
   
   const itemsPerPage = 10;
 
   // Mock data - 15 lessons
-  const [lessons, setLessons] = useState<Lesson[]>([
+  const lessons: Lesson[] = [
     {
       id: 'LSN001234',
       studentId: 'MID102938',
@@ -440,74 +398,7 @@ export function LessonSchedule() {
       status: 'Scheduled',
       reason: ''
     },
-  ]);
-
-  // Helper: Calculate day name from date
-  const getDayName = (dateStr: string): string => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return days[new Date(dateStr).getDay()];
-  };
-
-  // Helper: Calculate day index from date
-  const getDayIndex = (dateStr: string): number => {
-    return new Date(dateStr).getDay();
-  };
-
-  // Helper: Find student by ID
-  const findStudent = (id: string): Student | undefined => {
-    return MOCK_STUDENTS.find(s => s.id === id);
-  };
-
-  // Helper: Find teacher by ID
-  const findTeacher = (id: string): Teacher | undefined => {
-    return MOCK_TEACHERS.find(t => t.id === id);
-  };
-
-  // Helper: Check for time conflicts
-  const checkConflicts = (lessonId: string, data: Partial<Lesson>): string | null => {
-    const currentLesson = lessons.find(l => l.id === lessonId);
-    if (!currentLesson) return null;
-
-    const checkDate = data.date || currentLesson.date;
-    const checkStudentId = data.studentId || currentLesson.studentId;
-    const checkTeacherId = data.teacherId || currentLesson.teacherId;
-    const checkStartStudent = data.startTimeStudent || currentLesson.startTimeStudent;
-    const checkEndStudent = data.endTimeStudent || currentLesson.endTimeStudent;
-    const checkStartTeacher = data.startTimeTeacher || currentLesson.startTimeTeacher;
-    const checkEndTeacher = data.endTimeTeacher || currentLesson.endTimeTeacher;
-
-    // Check student conflicts
-    const studentConflicts = lessons.filter(l => 
-      l.id !== lessonId &&
-      l.studentId === checkStudentId &&
-      l.date === checkDate &&
-      l.status === 'Scheduled' &&
-      ((checkStartStudent >= l.startTimeStudent && checkStartStudent < l.endTimeStudent) ||
-       (checkEndStudent > l.startTimeStudent && checkEndStudent <= l.endTimeStudent) ||
-       (checkStartStudent <= l.startTimeStudent && checkEndStudent >= l.endTimeStudent))
-    );
-
-    if (studentConflicts.length > 0) {
-      return `Time conflict: Student ${checkStudentId} has another lesson at this time`;
-    }
-
-    // Check teacher conflicts
-    const teacherConflicts = lessons.filter(l => 
-      l.id !== lessonId &&
-      l.teacherId === checkTeacherId &&
-      l.date === checkDate &&
-      l.status === 'Scheduled' &&
-      ((checkStartTeacher >= l.startTimeTeacher && checkStartTeacher < l.endTimeTeacher) ||
-       (checkEndTeacher > l.startTimeTeacher && checkEndTeacher <= l.endTimeTeacher) ||
-       (checkStartTeacher <= l.startTimeTeacher && checkEndTeacher >= l.endTimeTeacher))
-    );
-
-    if (teacherConflicts.length > 0) {
-      return `Time conflict: Teacher ${checkTeacherId} has another lesson at this time`;
-    }
-
-    return null;
-  };
+  ];
 
   // Filter logic
   const filteredLessons = lessons.filter(lesson => {
@@ -544,257 +435,6 @@ export function LessonSchedule() {
   const totalPages = Math.ceil(filteredLessons.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedLessons = filteredLessons.slice(startIndex, startIndex + itemsPerPage);
-
-  const toggleEditMode = (lessonId: string) => {
-    const newEditingRows = new Set(editingRows);
-    if (newEditingRows.has(lessonId)) {
-      newEditingRows.delete(lessonId);
-      const newEditedData = { ...editedData };
-      delete newEditedData[lessonId];
-      setEditedData(newEditedData);
-      
-      const newErrors = { ...errors };
-      const newConflicts = { ...conflicts };
-      Object.keys(newErrors).forEach(key => {
-        if (key.startsWith(lessonId)) {
-          delete newErrors[key];
-        }
-      });
-      Object.keys(newConflicts).forEach(key => {
-        if (key.startsWith(lessonId)) {
-          delete newConflicts[key];
-        }
-      });
-      setErrors(newErrors);
-      setConflicts(newConflicts);
-    } else {
-      newEditingRows.add(lessonId);
-    }
-    setEditingRows(newEditingRows);
-  };
-
-  const handleCellChange = (lessonId: string, field: keyof Lesson, value: any) => {
-    const currentLesson = lessons.find(l => l.id === lessonId);
-    if (!currentLesson) return;
-
-    let updates: Partial<Lesson> = { [field]: value };
-
-    // Auto-fill logic for Student_ID change
-    if (field === 'studentId') {
-      const student = findStudent(value);
-      if (student) {
-        updates = {
-          ...updates,
-          studentName: student.name,
-          studentTimeZone: student.timeZone,
-        };
-      }
-    }
-
-    // Auto-fill logic for Teacher_ID change
-    if (field === 'teacherId') {
-      const teacher = findTeacher(value);
-      if (teacher) {
-        updates = {
-          ...updates,
-          teacherName: teacher.name,
-          teacherTimeZone: teacher.timeZone,
-        };
-      }
-    }
-
-    // Auto-calculate day info when date changes
-    if (field === 'date') {
-      updates = {
-        ...updates,
-        dayName: getDayName(value),
-        dayIndex: getDayIndex(value),
-        studentDate: value, // Simplified - in real app would calculate based on timezone
-        teacherDate: value,
-      };
-    }
-
-    // Auto-calculate end time (simplified - 1 hour duration)
-    if (field === 'startTimeStudent') {
-      const [hours, minutes] = value.split(':');
-      const endHour = (parseInt(hours) + 1).toString().padStart(2, '0');
-      updates = {
-        ...updates,
-        endTimeStudent: `${endHour}:${minutes}`,
-      };
-    }
-
-    if (field === 'startTimeTeacher') {
-      const [hours, minutes] = value.split(':');
-      const endHour = (parseInt(hours) + 1).toString().padStart(2, '0');
-      updates = {
-        ...updates,
-        endTimeTeacher: `${endHour}:${minutes}`,
-      };
-    }
-
-    setEditedData({
-      ...editedData,
-      [lessonId]: {
-        ...editedData[lessonId],
-        ...updates,
-      }
-    });
-
-    // Clear errors for updated fields
-    Object.keys(updates).forEach(key => {
-      const errorKey = `${lessonId}-${key}`;
-      if (errors[errorKey]) {
-        const newErrors = { ...errors };
-        delete newErrors[errorKey];
-        setErrors(newErrors);
-      }
-    });
-
-    // Check for conflicts
-    const mergedData = { ...currentLesson, ...editedData[lessonId], ...updates };
-    const conflict = checkConflicts(lessonId, mergedData);
-    const newConflicts = { ...conflicts };
-    if (conflict) {
-      newConflicts[lessonId] = conflict;
-    } else {
-      delete newConflicts[lessonId];
-    }
-    setConflicts(newConflicts);
-  };
-
-  const getCellValue = (lesson: Lesson, field: keyof Lesson) => {
-    if (editedData[lesson.id] && field in editedData[lesson.id]) {
-      return editedData[lesson.id][field];
-    }
-    return lesson[field];
-  };
-
-  const validateChanges = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    Object.entries(editedData).forEach(([lessonId, data]) => {
-      const currentLesson = lessons.find(l => l.id === lessonId);
-      if (!currentLesson) return;
-
-      // Validate time ordering
-      if ('startTimeStudent' in data || 'endTimeStudent' in data) {
-        const start = data.startTimeStudent || currentLesson.startTimeStudent;
-        const end = data.endTimeStudent || currentLesson.endTimeStudent;
-        if (start >= end) {
-          newErrors[`${lessonId}-endTimeStudent`] = 'End time must be after start time';
-        }
-      }
-
-      if ('startTimeTeacher' in data || 'endTimeTeacher' in data) {
-        const start = data.startTimeTeacher || currentLesson.startTimeTeacher;
-        const end = data.endTimeTeacher || currentLesson.endTimeTeacher;
-        if (start >= end) {
-          newErrors[`${lessonId}-endTimeTeacher`] = 'End time must be after start time';
-        }
-      }
-
-      // Validate required reason for cancellation statuses
-      const status = data.status || currentLesson.status;
-      const reason = data.reason || currentLesson.reason;
-      if (['Cancelled', 'Paid_Cancelled', 'Trial_Canceled'].includes(status) && !reason.trim()) {
-        newErrors[`${lessonId}-reason`] = 'Reason required for cancellation';
-      }
-
-      // Validate student and teacher exist
-      if (data.studentId) {
-        const student = findStudent(data.studentId);
-        if (!student) {
-          newErrors[`${lessonId}-studentId`] = 'Invalid student ID';
-        }
-      }
-
-      if (data.teacherId) {
-        const teacher = findTeacher(data.teacherId);
-        if (!teacher) {
-          newErrors[`${lessonId}-teacherId`] = 'Invalid teacher ID';
-        }
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSaveChanges = () => {
-    if (!validateChanges()) {
-      return;
-    }
-
-    // Check if there are conflicts
-    const conflictedLessons = Object.keys(conflicts);
-    if (conflictedLessons.length > 0) {
-      setConflictLesson(conflictedLessons[0]);
-      setShowConflictModal(true);
-      return;
-    }
-
-    proceedWithSave();
-  };
-
-  const proceedWithSave = () => {
-    const updatedLessons = lessons.map(lesson => {
-      if (editedData[lesson.id]) {
-        return { ...lesson, ...editedData[lesson.id] };
-      }
-      return lesson;
-    });
-
-    setLessons(updatedLessons);
-    setEditedData({});
-    setEditingRows(new Set());
-    setErrors({});
-    setConflicts({});
-    setShowConflictModal(false);
-    setConflictLesson(null);
-  };
-
-  const handleDiscardChanges = () => {
-    setEditedData({});
-    setEditingRows(new Set());
-    setErrors({});
-    setConflicts({});
-  };
-
-  const handleDuplicate = (lesson: Lesson) => {
-    const newId = `LSN${String(Math.floor(Math.random() * 1000000)).padStart(6, '0')}`;
-    const duplicated: Lesson = {
-      ...lesson,
-      id: newId,
-      status: 'Scheduled',
-      reason: '',
-    };
-    setLessons([duplicated, ...lessons]);
-  };
-
-  const handleCancelLesson = (lessonId: string) => {
-    setCancelLessonId(lessonId);
-    setCancelReason('');
-    setShowCancelModal(true);
-  };
-
-  const confirmCancel = () => {
-    if (!cancelLessonId || !cancelReason.trim()) return;
-
-    const updatedLessons = lessons.map(lesson => {
-      if (lesson.id === cancelLessonId) {
-        return { ...lesson, status: 'Cancelled' as LessonStatus, reason: cancelReason };
-      }
-      return lesson;
-    });
-
-    setLessons(updatedLessons);
-    setShowCancelModal(false);
-    setCancelLessonId(null);
-    setCancelReason('');
-  };
-
-  const hasChanges = Object.keys(editedData).length > 0;
 
   // Calculate stats
   const statusCounts = {
@@ -838,7 +478,46 @@ export function LessonSchedule() {
               <Calendar className="size-6 text-blue-600" />
               <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Lesson Schedule</h1>
             </div>
-            <p className="text-gray-600">Single source of truth for all lessons - View, edit, and manage all lesson data</p>
+            <p className="text-gray-600">View and monitor all lesson schedule records</p>
+          </div>
+        </div>
+
+        {/* Read-Only Banner */}
+        <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <div className="size-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="size-5 text-blue-700" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Lock className="size-4 text-blue-700" />
+                <h3 className="font-semibold text-blue-900">Read-Only Report</h3>
+              </div>
+              <p className="text-sm text-blue-800">
+                This is a read-only view for monitoring and auditing purposes. Lessons cannot be edited, modified, or deleted from this screen.
+                Use this page to review schedule records and view detailed information.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <p className="text-sm text-gray-600">Total Lessons</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">{lessons.length}</p>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-700">Scheduled</p>
+            <p className="text-2xl font-semibold text-blue-900 mt-1">{statusCounts.Scheduled}</p>
+          </div>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm text-green-700">Completed</p>
+            <p className="text-2xl font-semibold text-green-900 mt-1">{statusCounts.Completed}</p>
+          </div>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p className="text-sm text-gray-700">Cancelled</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">{statusCounts.Cancelled}</p>
           </div>
         </div>
 
@@ -1045,39 +724,44 @@ export function LessonSchedule() {
                   <tr>
                     {/* Frozen columns */}
                     <th className="sticky left-0 z-20 bg-gray-50 text-left px-3 py-3 text-xs font-medium text-gray-700 border-r-2 border-gray-300">
-                      Lesson ID
+                      <div className="flex items-center gap-1">
+                        Lesson ID
+                        <Lock className="size-3 text-gray-400" />
+                      </div>
                     </th>
-                    <th className="sticky left-[100px] z-20 bg-gray-50 text-left px-3 py-3 text-xs font-medium text-gray-700 border-r-2 border-gray-300">
+                    <th className="sticky left-[110px] z-20 bg-gray-50 text-left px-3 py-3 text-xs font-medium text-gray-700 border-r-2 border-gray-300">
                       Student Name
                     </th>
                     
-                    {/* Identity fields */}
-                    <th className="bg-blue-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Student ID ✏️</th>
+                    {/* Student Info */}
+                    <th className="bg-blue-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Student ID</th>
                     <th className="bg-blue-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Student TZ</th>
-                    <th className="bg-purple-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Teacher ID ✏️</th>
+                    
+                    {/* Teacher Info */}
+                    <th className="bg-purple-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Teacher ID</th>
                     <th className="bg-purple-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Teacher Name</th>
                     <th className="bg-purple-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Teacher TZ</th>
                     
                     {/* Lesson info */}
-                    <th className="bg-green-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Subject ✏️</th>
-                    <th className="bg-green-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Stage ✏️</th>
+                    <th className="bg-green-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Subject</th>
+                    <th className="bg-green-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Stage</th>
                     
-                    {/* Date/Time fields */}
+                    {/* Date/Time */}
                     <th className="bg-orange-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Day Name</th>
-                    <th className="bg-orange-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Date ✏️</th>
+                    <th className="bg-orange-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Date</th>
                     <th className="bg-orange-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Student Date</th>
                     <th className="bg-orange-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Teacher Date</th>
                     <th className="bg-orange-50 text-right px-3 py-3 text-xs font-medium text-gray-700">Day Index</th>
                     
                     {/* Time slots */}
-                    <th className="bg-yellow-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Start (Student) ✏️</th>
+                    <th className="bg-yellow-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Start (Student)</th>
                     <th className="bg-yellow-50 text-left px-3 py-3 text-xs font-medium text-gray-700">End (Student)</th>
-                    <th className="bg-yellow-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Start (Teacher) ✏️</th>
+                    <th className="bg-yellow-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Start (Teacher)</th>
                     <th className="bg-yellow-50 text-left px-3 py-3 text-xs font-medium text-gray-700">End (Teacher)</th>
                     
                     {/* Status */}
-                    <th className="bg-pink-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Status ✏️</th>
-                    <th className="bg-pink-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Reason ✏️</th>
+                    <th className="bg-pink-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Status</th>
+                    <th className="bg-pink-50 text-left px-3 py-3 text-xs font-medium text-gray-700">Reason</th>
                     
                     {/* Actions */}
                     <th className="sticky right-0 z-20 bg-gray-50 text-left px-3 py-3 text-xs font-medium text-gray-700 border-l-2 border-gray-300">
@@ -1087,295 +771,122 @@ export function LessonSchedule() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {paginatedLessons.map(lesson => {
-                    const isEditing = editingRows.has(lesson.id);
-                    const hasEdits = !!editedData[lesson.id];
-                    const hasConflict = !!conflicts[lesson.id];
                     const StatusIcon = getStatusIcon(lesson.status);
                     
                     return (
-                      <tr 
-                        key={lesson.id} 
-                        className={`hover:bg-gray-50 transition-colors ${hasEdits ? 'bg-blue-50' : ''} ${hasConflict ? 'bg-orange-50' : ''}`}
-                      >
+                      <tr key={lesson.id} className="hover:bg-gray-50 transition-colors">
                         {/* Frozen: Lesson ID */}
                         <td className="sticky left-0 z-10 bg-white px-3 py-3 border-r-2 border-gray-200 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs text-gray-900">{lesson.id}</span>
-                            {isEditing && <Edit3 className="size-3 text-blue-600" />}
-                            {hasConflict && <AlertTriangle className="size-3 text-orange-600" />}
-                          </div>
+                          <span className="font-mono text-xs text-gray-900">{lesson.id}</span>
                         </td>
                         
                         {/* Frozen: Student Name */}
-                        <td className="sticky left-[100px] z-10 bg-white px-3 py-3 border-r-2 border-gray-200 whitespace-nowrap">
-                          <span className="font-medium text-sm text-gray-900">{getCellValue(lesson, 'studentName')}</span>
+                        <td className="sticky left-[110px] z-10 bg-white px-3 py-3 border-r-2 border-gray-200 whitespace-nowrap">
+                          <span className="font-medium text-sm text-gray-900">{lesson.studentName}</span>
                         </td>
                         
-                        {/* Student ID (editable) */}
+                        {/* Student ID */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <select
-                              value={getCellValue(lesson, 'studentId')}
-                              onChange={(e) => handleCellChange(lesson.id, 'studentId', e.target.value)}
-                              className={`w-32 px-2 py-1 border rounded text-xs font-mono ${
-                                errors[`${lesson.id}-studentId`] ? 'border-red-500' : 'border-blue-300'
-                              }`}
-                            >
-                              {MOCK_STUDENTS.map(s => (
-                                <option key={s.id} value={s.id}>{s.id}</option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className="font-mono text-xs text-gray-700">{lesson.studentId}</span>
-                          )}
+                          <span className="font-mono text-xs text-gray-700">{lesson.studentId}</span>
                         </td>
                         
                         {/* Student TimeZone */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          <span className="text-xs text-gray-600">{getCellValue(lesson, 'studentTimeZone')}</span>
+                          <span className="text-xs text-gray-600">{lesson.studentTimeZone}</span>
                         </td>
                         
-                        {/* Teacher ID (editable) */}
+                        {/* Teacher ID */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <select
-                              value={getCellValue(lesson, 'teacherId')}
-                              onChange={(e) => handleCellChange(lesson.id, 'teacherId', e.target.value)}
-                              className={`w-28 px-2 py-1 border rounded text-xs font-mono ${
-                                errors[`${lesson.id}-teacherId`] ? 'border-red-500' : 'border-purple-300'
-                              }`}
-                            >
-                              {MOCK_TEACHERS.map(t => (
-                                <option key={t.id} value={t.id}>{t.id}</option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className="font-mono text-xs text-gray-700">{lesson.teacherId}</span>
-                          )}
+                          <span className="font-mono text-xs text-gray-700">{lesson.teacherId}</span>
                         </td>
                         
                         {/* Teacher Name */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          <span className="text-sm text-gray-900">{getCellValue(lesson, 'teacherName')}</span>
+                          <span className="text-sm text-gray-900">{lesson.teacherName}</span>
                         </td>
                         
                         {/* Teacher TimeZone */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          <span className="text-xs text-gray-600">{getCellValue(lesson, 'teacherTimeZone')}</span>
+                          <span className="text-xs text-gray-600">{lesson.teacherTimeZone}</span>
                         </td>
                         
-                        {/* Subject (editable) */}
+                        {/* Subject */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <select
-                              value={getCellValue(lesson, 'subject')}
-                              onChange={(e) => handleCellChange(lesson.id, 'subject', e.target.value)}
-                              className="w-32 px-2 py-1 border border-green-300 rounded text-xs"
-                            >
-                              {SUBJECTS.map(subject => (
-                                <option key={subject} value={subject}>{subject}</option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className="text-sm text-gray-900">{lesson.subject}</span>
-                          )}
+                          <span className="text-sm text-gray-900">{lesson.subject}</span>
                         </td>
                         
-                        {/* Stage (editable) */}
+                        {/* Stage */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <select
-                              value={getCellValue(lesson, 'stage')}
-                              onChange={(e) => handleCellChange(lesson.id, 'stage', e.target.value)}
-                              className="w-28 px-2 py-1 border border-green-300 rounded text-xs"
-                            >
-                              {STAGES.map(group => (
-                                <optgroup key={group.group} label={group.group}>
-                                  {group.options.map(stage => (
-                                    <option key={stage} value={stage}>{stage}</option>
-                                  ))}
-                                </optgroup>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className="text-sm text-gray-700">{lesson.stage}</span>
-                          )}
+                          <span className="text-sm text-gray-700">{lesson.stage}</span>
                         </td>
                         
-                        {/* Day Name (auto-calculated) */}
+                        {/* Day Name */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          <span className="text-sm text-gray-700">{getCellValue(lesson, 'dayName')}</span>
+                          <span className="text-sm text-gray-700">{lesson.dayName}</span>
                         </td>
                         
-                        {/* Date (editable) */}
+                        {/* Date */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <input
-                              type="date"
-                              value={getCellValue(lesson, 'date')}
-                              onChange={(e) => handleCellChange(lesson.id, 'date', e.target.value)}
-                              className="w-36 px-2 py-1 border border-orange-300 rounded text-xs font-mono"
-                            />
-                          ) : (
-                            <span className="text-xs text-gray-900 font-mono">{lesson.date}</span>
-                          )}
+                          <span className="text-xs text-gray-900 font-mono">{lesson.date}</span>
                         </td>
                         
                         {/* Student Date */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          <span className="text-xs text-gray-700 font-mono">{getCellValue(lesson, 'studentDate')}</span>
+                          <span className="text-xs text-gray-700 font-mono">{lesson.studentDate}</span>
                         </td>
                         
                         {/* Teacher Date */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          <span className="text-xs text-gray-700 font-mono">{getCellValue(lesson, 'teacherDate')}</span>
+                          <span className="text-xs text-gray-700 font-mono">{lesson.teacherDate}</span>
                         </td>
                         
                         {/* Day Index */}
                         <td className="px-3 py-3 text-right whitespace-nowrap">
-                          <span className="text-xs text-gray-700">{getCellValue(lesson, 'dayIndex')}</span>
+                          <span className="text-xs text-gray-700">{lesson.dayIndex}</span>
                         </td>
                         
-                        {/* Start Time Student (editable) */}
+                        {/* Start Time Student */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <input
-                              type="time"
-                              value={getCellValue(lesson, 'startTimeStudent')}
-                              onChange={(e) => handleCellChange(lesson.id, 'startTimeStudent', e.target.value)}
-                              className="w-24 px-2 py-1 border border-yellow-300 rounded text-xs font-mono"
-                            />
-                          ) : (
-                            <span className="text-xs font-mono text-gray-700">{lesson.startTimeStudent}</span>
-                          )}
+                          <span className="text-xs font-mono text-gray-700">{lesson.startTimeStudent}</span>
                         </td>
                         
                         {/* End Time Student */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          <span className="text-xs font-mono text-gray-700">{getCellValue(lesson, 'endTimeStudent')}</span>
-                          {errors[`${lesson.id}-endTimeStudent`] && (
-                            <p className="text-xs text-red-600 mt-1">{errors[`${lesson.id}-endTimeStudent`]}</p>
-                          )}
+                          <span className="text-xs font-mono text-gray-700">{lesson.endTimeStudent}</span>
                         </td>
                         
-                        {/* Start Time Teacher (editable) */}
+                        {/* Start Time Teacher */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <input
-                              type="time"
-                              value={getCellValue(lesson, 'startTimeTeacher')}
-                              onChange={(e) => handleCellChange(lesson.id, 'startTimeTeacher', e.target.value)}
-                              className="w-24 px-2 py-1 border border-yellow-300 rounded text-xs font-mono"
-                            />
-                          ) : (
-                            <span className="text-xs font-mono text-gray-700">{lesson.startTimeTeacher}</span>
-                          )}
+                          <span className="text-xs font-mono text-gray-700">{lesson.startTimeTeacher}</span>
                         </td>
                         
                         {/* End Time Teacher */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          <span className="text-xs font-mono text-gray-700">{getCellValue(lesson, 'endTimeTeacher')}</span>
-                          {errors[`${lesson.id}-endTimeTeacher`] && (
-                            <p className="text-xs text-red-600 mt-1">{errors[`${lesson.id}-endTimeTeacher`]}</p>
-                          )}
+                          <span className="text-xs font-mono text-gray-700">{lesson.endTimeTeacher}</span>
                         </td>
                         
-                        {/* Status (editable) */}
+                        {/* Status */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          {isEditing ? (
-                            <select
-                              value={getCellValue(lesson, 'status')}
-                              onChange={(e) => handleCellChange(lesson.id, 'status', e.target.value as LessonStatus)}
-                              className="w-32 px-2 py-1 border border-pink-300 rounded text-xs"
-                            >
-                              {STATUSES.map(status => (
-                                <option key={status} value={status}>{status.replace('_', ' ')}</option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(lesson.status)}`}>
-                              <StatusIcon className="size-3 mr-1" />
-                              {lesson.status.replace('_', ' ')}
-                            </span>
-                          )}
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(lesson.status)}`}>
+                            <StatusIcon className="size-3 mr-1" />
+                            {lesson.status.replace('_', ' ')}
+                          </span>
                         </td>
                         
-                        {/* Reason (editable) */}
+                        {/* Reason */}
                         <td className="px-3 py-3">
-                          {isEditing ? (
-                            <div>
-                              <input
-                                type="text"
-                                value={getCellValue(lesson, 'reason')}
-                                onChange={(e) => handleCellChange(lesson.id, 'reason', e.target.value)}
-                                className={`w-48 px-2 py-1 border rounded text-xs ${
-                                  errors[`${lesson.id}-reason`] ? 'border-red-500' : 'border-pink-300'
-                                }`}
-                                placeholder="Required for cancellations..."
-                              />
-                              {errors[`${lesson.id}-reason`] && (
-                                <p className="text-xs text-red-600 mt-1">{errors[`${lesson.id}-reason`]}</p>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-xs text-gray-600 line-clamp-1">{lesson.reason || '—'}</span>
-                          )}
+                          <span className="text-xs text-gray-600 line-clamp-1">{lesson.reason || '—'}</span>
                         </td>
                         
                         {/* Actions */}
                         <td className="sticky right-0 z-10 bg-white px-3 py-3 border-l-2 border-gray-200 whitespace-nowrap">
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => toggleEditMode(lesson.id)}
-                              className={`px-2 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1 ${
-                                isEditing 
-                                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
-                                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                              }`}
-                              title={isEditing ? "Done Editing" : "Edit Lesson"}
-                            >
-                              {isEditing ? (
-                                <>
-                                  <Check className="size-3" />
-                                  Done
-                                </>
-                              ) : (
-                                <>
-                                  <Edit3 className="size-3" />
-                                  Edit
-                                </>
-                              )}
-                            </button>
-                            <Link
-                              to={`/lessons/${lesson.id}`}
-                              className="px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-xs font-medium flex items-center gap-1"
-                              title="View Details"
-                            >
-                              <Eye className="size-3" />
-                            </Link>
-                            <button
-                              onClick={() => handleDuplicate(lesson)}
-                              className="px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors text-xs flex items-center"
-                              title="Duplicate Lesson"
-                            >
-                              <Copy className="size-3" />
-                            </button>
-                            {lesson.status === 'Scheduled' && (
-                              <button
-                                onClick={() => handleCancelLesson(lesson.id)}
-                                className="px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors text-xs flex items-center"
-                                title="Cancel Lesson"
-                              >
-                                <Ban className="size-3" />
-                              </button>
-                            )}
-                          </div>
-                          {hasConflict && (
-                            <div className="mt-1 flex items-center gap-1 text-xs text-orange-700">
-                              <AlertTriangle className="size-3" />
-                              <span>Conflict</span>
-                            </div>
-                          )}
+                          <Link
+                            to={`/lessons/${lesson.id}`}
+                            className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors text-xs font-medium flex items-center gap-1 w-fit"
+                          >
+                            <Eye className="size-3" />
+                            View
+                          </Link>
                         </td>
                       </tr>
                     );
@@ -1396,7 +907,7 @@ export function LessonSchedule() {
 
           {/* Pagination */}
           {paginatedLessons.length > 0 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
               <p className="text-sm text-gray-600">
                 Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredLessons.length)} of {filteredLessons.length} lessons
               </p>
@@ -1425,174 +936,22 @@ export function LessonSchedule() {
             </div>
           )}
         </div>
+
+        {/* Read-Only Footer Note */}
+        <div className="bg-gray-100 border border-gray-300 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="size-5 text-gray-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-gray-700">
+              <p className="font-medium mb-1">Audit & Reporting Mode</p>
+              <p>
+                This page is designed for viewing and auditing lesson schedules only. 
+                All modification, editing, and deletion capabilities are disabled to ensure data integrity. 
+                To make changes to lesson data, please use the appropriate management tools with proper permissions.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* Sticky Save/Discard Bar */}
-      {hasChanges && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-blue-500 shadow-2xl z-50">
-          <div className="max-w-[1800px] mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="size-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <AlertCircle className="size-5 text-blue-700" />
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Unsaved Changes</p>
-                  <p className="text-sm text-gray-600">
-                    {Object.keys(editedData).length} lesson{Object.keys(editedData).length > 1 ? 's' : ''} modified
-                    {Object.keys(conflicts).length > 0 && (
-                      <span className="text-orange-600 ml-2">
-                        • {Object.keys(conflicts).length} conflict{Object.keys(conflicts).length > 1 ? 's' : ''} detected
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              {Object.keys(errors).length > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg">
-                  <AlertCircle className="size-4 text-red-700" />
-                  <span className="text-sm text-red-700 font-medium">
-                    Please fix validation errors before saving
-                  </span>
-                </div>
-              )}
-
-              {Object.values(editedData).some(data => data.status === 'Completed') && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
-                  <Info className="size-4 text-green-700" />
-                  <span className="text-sm text-green-700">
-                    Completed lessons will be counted in finance
-                  </span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleDiscardChanges}
-                  className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
-                >
-                  <X className="size-4" />
-                  Discard
-                </button>
-                <button
-                  onClick={handleSaveChanges}
-                  className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
-                  disabled={Object.keys(errors).length > 0}
-                >
-                  <Save className="size-4" />
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Conflict Override Modal */}
-      {showConflictModal && conflictLesson && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="size-10 bg-orange-100 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="size-5 text-orange-700" />
-                </div>
-                <h3 className="font-semibold text-gray-900">Time Conflict Detected</h3>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <p className="text-gray-700 mb-4">
-                {conflicts[conflictLesson]}
-              </p>
-
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
-                <p className="text-sm text-orange-900 font-medium mb-2">
-                  Warning: Scheduling Conflict
-                </p>
-                <p className="text-sm text-orange-800">
-                  Saving this lesson will create a time conflict. This may cause issues with scheduling and lesson delivery.
-                  Are you sure you want to proceed?
-                </p>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowConflictModal(false);
-                  setConflictLesson(null);
-                }}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-              >
-                Go Back & Edit
-              </button>
-              <button
-                onClick={proceedWithSave}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 font-medium"
-              >
-                <AlertTriangle className="size-4" />
-                Override & Save Anyway
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cancel Lesson Modal */}
-      {showCancelModal && cancelLessonId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="size-10 bg-red-100 rounded-full flex items-center justify-center">
-                  <Ban className="size-5 text-red-700" />
-                </div>
-                <h3 className="font-semibold text-gray-900">Cancel Lesson</h3>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <p className="text-gray-700 mb-4">
-                Please provide a reason for cancelling this lesson:
-              </p>
-
-              <textarea
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="Enter cancellation reason..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm min-h-[100px]"
-              />
-
-              {cancelReason.trim() === '' && (
-                <p className="text-xs text-red-600 mt-2">Reason is required for cancellation</p>
-              )}
-            </div>
-
-            <div className="p-6 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowCancelModal(false);
-                  setCancelLessonId(null);
-                  setCancelReason('');
-                }}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-              >
-                Close
-              </button>
-              <button
-                onClick={confirmCancel}
-                disabled={!cancelReason.trim()}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Ban className="size-4" />
-                Cancel Lesson
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
