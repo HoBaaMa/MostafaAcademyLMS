@@ -21,6 +21,7 @@ import { CompletedLessonsList } from "./components/lessons/CompletedLessonsList"
 import { CompletedLessonDetails } from "./components/lessons/CompletedLessonDetails";
 import { LessonDetails } from "./components/lessons/LessonDetails";
 import { Finance } from "./components/Finance";
+import { Subjects } from "./components/Subjects";
 import { Diagnostics } from "./components/Diagnostics";
 import { Settings } from "./components/Settings";
 
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
       { path: "payments", Component: PaymentsList },
       { path: "payments/:id", Component: PaymentDetails },
       { path: "finance", Component: Finance },
+      { path: "subjects", Component: Subjects },
       { path: "diagnostics", Component: Diagnostics },
       { path: "settings", Component: Settings },
     ],

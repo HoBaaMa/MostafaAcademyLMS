@@ -14,7 +14,8 @@ import {
   UsersRound,
   ChevronRight,
   Receipt,
-  CheckCircle
+  CheckCircle,
+  Library
 } from 'lucide-react';
 
 export function DashboardLayout() {
@@ -25,6 +26,7 @@ export function DashboardLayout() {
     { name: 'Students', path: '/students', icon: UsersRound },
     { name: 'Parents', path: '/parents', icon: UserCog },
     { name: 'Teachers', path: '/teachers', icon: Presentation },
+    { name: 'Subjects', path: '/subjects', icon: Library },
     { name: 'Availability', path: '/availability', icon: Calendar },
     { name: 'Lesson Schedule', path: '/schedule', icon: BookOpen },
     { name: 'Completed Lessons', path: '/lessons/completed', icon: CheckCircle },

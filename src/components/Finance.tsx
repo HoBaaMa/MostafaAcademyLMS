@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { 
   Search, 
   Filter, 
@@ -643,8 +643,8 @@ export function Finance() {
                   const isExpanded = expandedRows.has(parent.parentId);
                   
                   return (
-                    <>
-                      <tr key={parent.parentId} className="hover:bg-gray-50 transition-colors">
+                    <Fragment key={parent.parentId}>
+                      <tr className="hover:bg-gray-50 transition-colors">
                         {/* Frozen: Parent ID */}
                         <td className="sticky left-0 z-10 bg-white px-4 py-3 border-r-2 border-gray-200 whitespace-nowrap">
                           <div className="flex items-center gap-2">
@@ -838,7 +838,7 @@ export function Finance() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })}
               </tbody>
