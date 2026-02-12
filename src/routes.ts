@@ -6,6 +6,7 @@ import { StudentAvailability } from "./components/StudentAvailability";
 import { TeacherManagement } from "./components/TeacherManagement";
 import { MatchingScheduling } from "./components/MatchingScheduling";
 import { LessonSchedule } from "./components/LessonSchedule";
+import { MasterSchedule } from "./components/MasterSchedule";
 import { ParentRegistration } from "./components/ParentRegistration";
 import { AvailabilityManagement } from "./components/AvailabilityManagement";
 import { TeacherRegistration } from "./components/TeacherRegistration";
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
       { path: "teacher-availability", Component: TeacherAvailability },
       { path: "matching", Component: MatchingScheduling },
       { path: "schedule", Component: LessonSchedule },
+      { path: "master-schedule", Component: MasterSchedule },
       { path: "lessons/:id", Component: LessonDetails },
       { path: "lessons/completed", Component: CompletedLessonsList },
       { path: "lessons/completed/:id", Component: CompletedLessonDetails },

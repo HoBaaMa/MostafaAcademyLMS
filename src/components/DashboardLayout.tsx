@@ -18,7 +18,8 @@ import {
   Library,
   Clock,
   UserCheck,
-  CreditCard
+  CreditCard,
+  CalendarCheck
 } from 'lucide-react';
 
 export function DashboardLayout() {
@@ -34,6 +35,7 @@ export function DashboardLayout() {
     { name: 'Student Availability', path: '/student-availability', icon: Clock },
     { name: 'Teacher Availability', path: '/teacher-availability', icon: UserCheck },
     { name: 'Lesson Schedule', path: '/schedule', icon: BookOpen },
+    { name: 'Master Schedule', path: '/master-schedule', icon: CalendarCheck },
     { name: 'Completed Lessons', path: '/lessons/completed', icon: CheckCircle },
     { name: 'Payments', path: '/payments', icon: Receipt },
     { name: 'Process Payments', path: '/payments/management', icon: CreditCard },
