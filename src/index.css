@@ -5,6 +5,11 @@
       --tw-translate-x: 0;
       --tw-translate-y: 0;
       --tw-translate-z: 0;
+      --tw-rotate-x: rotateX(0);
+      --tw-rotate-y: rotateY(0);
+      --tw-rotate-z: rotateZ(0);
+      --tw-skew-x: skewX(0);
+      --tw-skew-y: skewY(0);
       --tw-space-y-reverse: 0;
       --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
@@ -78,6 +83,7 @@
     --color-amber-700: oklch(.555 .163 48.998);
     --color-yellow-50: oklch(.987 .026 102.212);
     --color-yellow-100: oklch(.973 .071 103.193);
+    --color-yellow-200: oklch(.945 .129 101.54);
     --color-yellow-300: oklch(.905 .182 98.111);
     --color-yellow-400: oklch(.852 .199 91.936);
     --color-yellow-600: oklch(.681 .162 75.834);
@@ -129,6 +135,7 @@
     --spacing: .25rem;
     --container-xs: 20rem;
     --container-md: 28rem;
+    --container-2xl: 42rem;
     --container-3xl: 48rem;
     --container-4xl: 56rem;
     --container-5xl: 64rem;
@@ -586,6 +593,10 @@
     margin-inline: auto;
   }
 
+  .my-8 {
+    margin-block: calc(var(--spacing) * 8);
+  }
+
   .mt-0\.5 {
     margin-top: calc(var(--spacing) * .5);
   }
@@ -770,8 +781,8 @@
     height: calc(var(--spacing) * 6);
   }
 
-  .h-10 {
-    height: calc(var(--spacing) * 10);
+  .h-7 {
+    height: calc(var(--spacing) * 7);
   }
 
   .h-screen {
@@ -782,16 +793,16 @@
     max-height: calc(var(--spacing) * 60);
   }
 
-  .max-h-96 {
-    max-height: calc(var(--spacing) * 96);
-  }
-
   .min-h-screen {
     min-height: 100vh;
   }
 
   .w-11 {
     width: calc(var(--spacing) * 11);
+  }
+
+  .w-12 {
+    width: calc(var(--spacing) * 12);
   }
 
   .w-20 {
@@ -822,6 +833,10 @@
     width: 100%;
   }
 
+  .max-w-2xl {
+    max-width: var(--container-2xl);
+  }
+
   .max-w-3xl {
     max-width: var(--container-3xl);
   }
@@ -840,6 +855,10 @@
 
   .max-w-7xl {
     max-width: var(--container-7xl);
+  }
+
+  .max-w-\[1600px\] {
+    max-width: 1600px;
   }
 
   .max-w-\[1800px\] {
@@ -914,13 +933,23 @@
     flex-shrink: 0;
   }
 
-  .border-collapse {
-    border-collapse: collapse;
+  .translate-x-1 {
+    --tw-translate-x: calc(var(--spacing) * 1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+
+  .translate-x-6 {
+    --tw-translate-x: calc(var(--spacing) * 6);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
   }
 
   .-translate-y-1\/2 {
     --tw-translate-y: calc(calc(1 / 2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+
+  .transform {
+    transform: var(--tw-rotate-x) var(--tw-rotate-y) var(--tw-rotate-z) var(--tw-skew-x) var(--tw-skew-y);
   }
 
   .animate-spin {
@@ -1246,6 +1275,10 @@
     border-color: var(--color-red-500);
   }
 
+  .border-yellow-200 {
+    border-color: var(--color-yellow-200);
+  }
+
   .border-yellow-300 {
     border-color: var(--color-yellow-300);
   }
@@ -1288,6 +1321,10 @@
 
   .bg-gray-200 {
     background-color: var(--color-gray-200);
+  }
+
+  .bg-gray-300 {
+    background-color: var(--color-gray-300);
   }
 
   .bg-gray-600 {
@@ -1388,6 +1425,10 @@
 
   .p-1 {
     padding: calc(var(--spacing) * 1);
+  }
+
+  .p-1\.5 {
+    padding: calc(var(--spacing) * 1.5);
   }
 
   .p-2 {
@@ -1508,10 +1549,6 @@
 
   .pb-2 {
     padding-bottom: calc(var(--spacing) * 2);
-  }
-
-  .pb-3 {
-    padding-bottom: calc(var(--spacing) * 3);
   }
 
   .pl-3 {
@@ -2163,6 +2200,12 @@
   }
 
   @media (width >= 48rem) {
+    .md\:w-64 {
+      width: calc(var(--spacing) * 64);
+    }
+  }
+
+  @media (width >= 48rem) {
     .md\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -2322,6 +2365,36 @@ html {
   syntax: "*";
   inherits: false;
   initial-value: 0;
+}
+
+@property --tw-rotate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: rotateX(0);
+}
+
+@property --tw-rotate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: rotateY(0);
+}
+
+@property --tw-rotate-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: rotateZ(0);
+}
+
+@property --tw-skew-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: skewX(0);
+}
+
+@property --tw-skew-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: skewY(0);
 }
 
 @property --tw-space-y-reverse {

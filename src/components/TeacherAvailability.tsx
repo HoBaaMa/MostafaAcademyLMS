@@ -11,31 +11,27 @@ import {
   Plus,
   Eye,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Check
 } from 'lucide-react';
-
-type TimeRange = {
-  start: string;
-  end: string;
-};
 
 type Availability = {
   id: string;
-  studentId: string;
-  studentName: string;
-  day: string;
-  timeRanges: TimeRange[];
-  prefTeacherId: string;
+  teacherId: string;
   teacherName: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
 };
 
-type EditedAvailability = Availability & { hasChanges?: boolean };
+type EditedAvailability = Availability & { hasChanges?: boolean; hasConflict?: boolean };
 
-export function StudentAvailability() {
+export function TeacherAvailability() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDay, setSelectedDay] = useState('');
-  const [selectedTeacher, setSelectedTeacher] = useState('');
-  const [selectedStage, setSelectedStage] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [errors, setErrors] = useState<Record<string, Record<string, string>>>({});
@@ -43,150 +39,173 @@ export function StudentAvailability() {
   // Mock data
   const initialAvailability: Availability[] = [
     {
-      id: 'AV001',
-      studentId: 'STU001',
-      studentName: 'Sarah Johnson',
+      id: 'TA001',
+      teacherId: 'TCH001',
+      teacherName: 'Dr. Ahmed Hassan',
       day: 'Monday',
-      timeRanges: [{ start: '16:00', end: '18:00' }],
-      prefTeacherId: 'TCH001',
-      teacherName: 'Dr. Ahmed Hassan'
+      startTime: '08:00',
+      endTime: '16:00',
+      isAvailable: true
     },
     {
-      id: 'AV002',
-      studentId: 'STU001',
-      studentName: 'Sarah Johnson',
+      id: 'TA002',
+      teacherId: 'TCH001',
+      teacherName: 'Dr. Ahmed Hassan',
       day: 'Wednesday',
-      timeRanges: [{ start: '17:00', end: '19:00' }],
-      prefTeacherId: 'TCH001',
-      teacherName: 'Dr. Ahmed Hassan'
+      startTime: '09:00',
+      endTime: '17:00',
+      isAvailable: true
     },
     {
-      id: 'AV003',
-      studentId: 'STU002',
-      studentName: 'Michael Chen',
+      id: 'TA003',
+      teacherId: 'TCH002',
+      teacherName: 'Prof. Fatima Al-Sayed',
       day: 'Tuesday',
-      timeRanges: [{ start: '15:00', end: '17:00' }, { start: '19:00', end: '20:00' }],
-      prefTeacherId: '',
-      teacherName: ''
+      startTime: '10:00',
+      endTime: '18:00',
+      isAvailable: true
     },
     {
-      id: 'AV004',
-      studentId: 'STU003',
-      studentName: 'Emily Rodriguez',
+      id: 'TA004',
+      teacherId: 'TCH002',
+      teacherName: 'Prof. Fatima Al-Sayed',
       day: 'Thursday',
-      timeRanges: [{ start: '16:00', end: '18:00' }],
-      prefTeacherId: 'TCH002',
-      teacherName: 'Prof. Fatima Al-Sayed'
+      startTime: '',
+      endTime: '',
+      isAvailable: false
     },
     {
-      id: 'AV005',
-      studentId: 'STU002',
-      studentName: 'Michael Chen',
-      day: 'Friday',
-      timeRanges: [{ start: '14:00', end: '16:00' }],
-      prefTeacherId: '',
-      teacherName: ''
-    },
-    {
-      id: 'AV006',
-      studentId: 'STU004',
-      studentName: 'Omar Abdullah',
-      day: 'Sunday',
-      timeRanges: [{ start: '10:00', end: '12:00' }],
-      prefTeacherId: 'TCH003',
-      teacherName: 'Mr. John Smith'
-    },
-    {
-      id: 'AV007',
-      studentId: 'STU005',
-      studentName: 'Layla Hassan',
+      id: 'TA005',
+      teacherId: 'TCH003',
+      teacherName: 'Mr. John Smith',
       day: 'Monday',
-      timeRanges: [{ start: '15:00', end: '17:00' }],
-      prefTeacherId: '',
-      teacherName: ''
+      startTime: '14:00',
+      endTime: '20:00',
+      isAvailable: true
     },
     {
-      id: 'AV008',
-      studentId: 'STU003',
-      studentName: 'Emily Rodriguez',
-      day: 'Saturday',
-      timeRanges: [{ start: '09:00', end: '11:00' }, { start: '14:00', end: '16:00' }],
-      prefTeacherId: 'TCH002',
-      teacherName: 'Prof. Fatima Al-Sayed'
+      id: 'TA006',
+      teacherId: 'TCH003',
+      teacherName: 'Mr. John Smith',
+      day: 'Friday',
+      startTime: '08:00',
+      endTime: '14:00',
+      isAvailable: true
     },
     {
-      id: 'AV009',
-      studentId: 'STU006',
-      studentName: 'Ahmed Al-Mansoori',
+      id: 'TA007',
+      teacherId: 'TCH004',
+      teacherName: 'Ms. Maria Garcia',
+      day: 'Sunday',
+      startTime: '10:00',
+      endTime: '16:00',
+      isAvailable: true
+    },
+    {
+      id: 'TA008',
+      teacherId: 'TCH001',
+      teacherName: 'Dr. Ahmed Hassan',
+      day: 'Friday',
+      startTime: '08:00',
+      endTime: '12:00',
+      isAvailable: true
+    },
+    {
+      id: 'TA009',
+      teacherId: 'TCH004',
+      teacherName: 'Ms. Maria Garcia',
       day: 'Wednesday',
-      timeRanges: [{ start: '16:00', end: '18:00' }],
-      prefTeacherId: 'TCH001',
-      teacherName: 'Dr. Ahmed Hassan'
+      startTime: '',
+      endTime: '',
+      isAvailable: false
     },
     {
-      id: 'AV010',
-      studentId: 'STU004',
-      studentName: 'Omar Abdullah',
-      day: 'Tuesday',
-      timeRanges: [{ start: '17:00', end: '19:00' }],
-      prefTeacherId: '',
-      teacherName: ''
+      id: 'TA010',
+      teacherId: 'TCH002',
+      teacherName: 'Prof. Fatima Al-Sayed',
+      day: 'Saturday',
+      startTime: '09:00',
+      endTime: '15:00',
+      isAvailable: true
     }
   ];
 
-  const students = [
-    { id: 'STU001', name: 'Sarah Johnson', stage: 'Elementary' },
-    { id: 'STU002', name: 'Michael Chen', stage: 'Mid' },
-    { id: 'STU003', name: 'Emily Rodriguez', stage: 'High School' },
-    { id: 'STU004', name: 'Omar Abdullah', stage: 'Elementary' },
-    { id: 'STU005', name: 'Layla Hassan', stage: 'Mid' },
-    { id: 'STU006', name: 'Ahmed Al-Mansoori', stage: 'High School' }
+  const teachers = [
+    { id: 'TCH001', name: 'Dr. Ahmed Hassan', subject: 'Mathematics' },
+    { id: 'TCH002', name: 'Prof. Fatima Al-Sayed', subject: 'Physics' },
+    { id: 'TCH003', name: 'Mr. John Smith', subject: 'English' },
+    { id: 'TCH004', name: 'Ms. Maria Garcia', subject: 'Chemistry' },
+    { id: 'TCH005', name: 'Dr. Omar Khalil', subject: 'Arabic' }
   ];
 
-  const teachers = [
-    { id: 'TCH001', name: 'Dr. Ahmed Hassan' },
-    { id: 'TCH002', name: 'Prof. Fatima Al-Sayed' },
-    { id: 'TCH003', name: 'Mr. John Smith' },
-    { id: 'TCH004', name: 'Ms. Maria Garcia' }
-  ];
+  const subjects = ['Mathematics', 'Physics', 'Chemistry', 'English', 'Arabic', 'Biology'];
 
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  const [availability, setAvailability] = useState<EditedAvailability[]>(initialAvailability);
+  const [availability, setAvailability] = useState<EditedAvailability[]>(
+    initialAvailability.map(a => ({ ...a, hasConflict: false }))
+  );
   const [newAvailability, setNewAvailability] = useState<Availability>({
     id: '',
-    studentId: '',
-    studentName: '',
+    teacherId: '',
+    teacherName: '',
     day: '',
-    timeRanges: [{ start: '', end: '' }],
-    prefTeacherId: '',
-    teacherName: ''
+    startTime: '',
+    endTime: '',
+    isAvailable: true
   });
   const [newAvailabilityErrors, setNewAvailabilityErrors] = useState<Record<string, string>>({});
 
   const hasChanges = availability.some(a => a.hasChanges);
 
+  // Detect conflicts
+  const detectConflicts = (avails: EditedAvailability[]) => {
+    return avails.map(avail => {
+      if (!avail.isAvailable) return { ...avail, hasConflict: false };
+
+      const conflicts = avails.filter(other => 
+        other.id !== avail.id &&
+        other.teacherId === avail.teacherId &&
+        other.day === avail.day &&
+        other.isAvailable &&
+        other.startTime &&
+        other.endTime &&
+        avail.startTime &&
+        avail.endTime &&
+        (
+          (avail.startTime >= other.startTime && avail.startTime < other.endTime) ||
+          (avail.endTime > other.startTime && avail.endTime <= other.endTime) ||
+          (avail.startTime <= other.startTime && avail.endTime >= other.endTime)
+        )
+      );
+
+      return { ...avail, hasConflict: conflicts.length > 0 };
+    });
+  };
+
   // Filter
   const filteredAvailability = availability.filter(avail => {
     const matchesSearch = 
-      avail.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      avail.studentName.toLowerCase().includes(searchQuery.toLowerCase());
+      avail.teacherId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      avail.teacherName.toLowerCase().includes(searchQuery.toLowerCase());
     
     if (!matchesSearch) return false;
 
     if (selectedDay && avail.day !== selectedDay) return false;
-    if (selectedTeacher && avail.prefTeacherId !== selectedTeacher) return false;
     
-    if (selectedStage) {
-      const student = students.find(s => s.id === avail.studentId);
-      if (student && student.stage !== selectedStage) return false;
+    if (selectedStatus === 'available' && !avail.isAvailable) return false;
+    if (selectedStatus === 'unavailable' && avail.isAvailable) return false;
+    
+    if (selectedSubject) {
+      const teacher = teachers.find(t => t.id === avail.teacherId);
+      if (teacher && teacher.subject !== selectedSubject) return false;
     }
 
     return true;
   });
 
   const formatTime = (time: string): string => {
-    if (!time) return '';
+    if (!time) return '—';
     const [hours, minutes] = time.split(':');
     const hour = parseInt(hours);
     const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -194,34 +213,31 @@ export function StudentAvailability() {
     return `${hour12}:${minutes} ${ampm}`;
   };
 
-  const formatTimeRanges = (ranges: TimeRange[]): string => {
-    return ranges
-      .filter(r => r.start && r.end)
-      .map(r => `${formatTime(r.start)} – ${formatTime(r.end)}`)
-      .join(', ');
-  };
-
   const handleFieldChange = (availId: string, field: keyof Availability, value: any) => {
-    setAvailability(prev => prev.map(avail => {
-      if (avail.id === availId) {
-        const updated = { ...avail, [field]: value, hasChanges: true };
-        
-        // Auto-fill student name
-        if (field === 'studentId') {
-          const student = students.find(s => s.id === value);
-          updated.studentName = student?.name || '';
+    setAvailability(prev => {
+      const updated = prev.map(avail => {
+        if (avail.id === availId) {
+          const newAvail = { ...avail, [field]: value, hasChanges: true };
+          
+          // Auto-fill teacher name
+          if (field === 'teacherId') {
+            const teacher = teachers.find(t => t.id === value);
+            newAvail.teacherName = teacher?.name || '';
+          }
+          
+          // Clear time inputs when setting to unavailable
+          if (field === 'isAvailable' && !value) {
+            newAvail.startTime = '';
+            newAvail.endTime = '';
+          }
+          
+          return newAvail;
         }
-        
-        // Auto-fill teacher name
-        if (field === 'prefTeacherId') {
-          const teacher = teachers.find(t => t.id === value);
-          updated.teacherName = teacher?.name || '';
-        }
-        
-        return updated;
-      }
-      return avail;
-    }));
+        return avail;
+      });
+
+      return detectConflicts(updated);
+    });
 
     // Clear error when user makes changes
     if (errors[availId]?.[field]) {
@@ -238,42 +254,8 @@ export function StudentAvailability() {
     }
   };
 
-  const handleTimeRangeChange = (availId: string, rangeIndex: number, field: 'start' | 'end', value: string) => {
-    setAvailability(prev => prev.map(avail => {
-      if (avail.id === availId) {
-        const newTimeRanges = [...avail.timeRanges];
-        newTimeRanges[rangeIndex] = { ...newTimeRanges[rangeIndex], [field]: value };
-        return { ...avail, timeRanges: newTimeRanges, hasChanges: true };
-      }
-      return avail;
-    }));
-  };
-
-  const addTimeRange = (availId: string) => {
-    setAvailability(prev => prev.map(avail => {
-      if (avail.id === availId) {
-        return {
-          ...avail,
-          timeRanges: [...avail.timeRanges, { start: '', end: '' }],
-          hasChanges: true
-        };
-      }
-      return avail;
-    }));
-  };
-
-  const removeTimeRange = (availId: string, rangeIndex: number) => {
-    setAvailability(prev => prev.map(avail => {
-      if (avail.id === availId && avail.timeRanges.length > 1) {
-        const newTimeRanges = avail.timeRanges.filter((_, idx) => idx !== rangeIndex);
-        return { ...avail, timeRanges: newTimeRanges, hasChanges: true };
-      }
-      return avail;
-    }));
-  };
-
   const handleRemoveRow = (availId: string) => {
-    setAvailability(prev => prev.filter(a => a.id !== availId));
+    setAvailability(prev => detectConflicts(prev.filter(a => a.id !== availId)));
   };
 
   const validateAvailability = (): boolean => {
@@ -285,8 +267,8 @@ export function StudentAvailability() {
 
       const availErrors: Record<string, string> = {};
 
-      if (!avail.studentId) {
-        availErrors.studentId = 'Student ID required';
+      if (!avail.teacherId) {
+        availErrors.teacherId = 'Teacher ID required';
         isValid = false;
       }
 
@@ -295,35 +277,25 @@ export function StudentAvailability() {
         isValid = false;
       }
 
-      // Validate time ranges
-      const validRanges = avail.timeRanges.filter(r => r.start && r.end);
-      if (validRanges.length === 0) {
-        availErrors.timeRanges = 'At least one time range required';
-        isValid = false;
-      }
-
-      // Check for time range validity
-      avail.timeRanges.forEach((range, idx) => {
-        if (range.start && range.end && range.start >= range.end) {
-          availErrors[`timeRange${idx}`] = 'End time must be after start time';
+      // Validate time inputs when available
+      if (avail.isAvailable) {
+        if (!avail.startTime) {
+          availErrors.startTime = 'Start time required';
           isValid = false;
         }
-      });
+        if (!avail.endTime) {
+          availErrors.endTime = 'End time required';
+          isValid = false;
+        }
+        if (avail.startTime && avail.endTime && avail.startTime >= avail.endTime) {
+          availErrors.time = 'End time must be after start time';
+          isValid = false;
+        }
+      }
 
-      // Check for duplicates
-      const duplicates = availability.filter(a => 
-        a.id !== avail.id &&
-        a.studentId === avail.studentId &&
-        a.day === avail.day &&
-        a.timeRanges.some(r1 => 
-          avail.timeRanges.some(r2 => 
-            r1.start === r2.start && r1.end === r2.end
-          )
-        )
-      );
-
-      if (duplicates.length > 0) {
-        availErrors.duplicate = 'Duplicate availability entry';
+      // Check for conflicts
+      if (avail.hasConflict) {
+        availErrors.conflict = 'Time overlap detected';
         isValid = false;
       }
 
@@ -351,30 +323,30 @@ export function StudentAvailability() {
   };
 
   const handleDiscard = () => {
-    setAvailability(initialAvailability);
+    setAvailability(detectConflicts(initialAvailability.map(a => ({ ...a, hasConflict: false }))));
     setErrors({});
   };
 
   const generateAvailabilityId = (): string => {
-    const existingIds = availability.map(a => parseInt(a.id.replace('AV', '')));
+    const existingIds = availability.map(a => parseInt(a.id.replace('TA', '')));
     const maxId = Math.max(...existingIds, 0);
-    return `AV${String(maxId + 1).padStart(3, '0')}`;
+    return `TA${String(maxId + 1).padStart(3, '0')}`;
   };
 
   const handleNewAvailabilityFieldChange = (field: keyof Availability, value: any) => {
     setNewAvailability(prev => {
       const updated = { ...prev, [field]: value };
       
-      // Auto-fill student name
-      if (field === 'studentId') {
-        const student = students.find(s => s.id === value);
-        updated.studentName = student?.name || '';
-      }
-      
       // Auto-fill teacher name
-      if (field === 'prefTeacherId') {
+      if (field === 'teacherId') {
         const teacher = teachers.find(t => t.id === value);
         updated.teacherName = teacher?.name || '';
+      }
+      
+      // Clear time inputs when setting to unavailable
+      if (field === 'isAvailable' && !value) {
+        updated.startTime = '';
+        updated.endTime = '';
       }
       
       return updated;
@@ -390,36 +362,12 @@ export function StudentAvailability() {
     }
   };
 
-  const handleNewTimeRangeChange = (rangeIndex: number, field: 'start' | 'end', value: string) => {
-    setNewAvailability(prev => {
-      const newTimeRanges = [...prev.timeRanges];
-      newTimeRanges[rangeIndex] = { ...newTimeRanges[rangeIndex], [field]: value };
-      return { ...prev, timeRanges: newTimeRanges };
-    });
-  };
-
-  const addNewTimeRange = () => {
-    setNewAvailability(prev => ({
-      ...prev,
-      timeRanges: [...prev.timeRanges, { start: '', end: '' }]
-    }));
-  };
-
-  const removeNewTimeRange = (rangeIndex: number) => {
-    if (newAvailability.timeRanges.length > 1) {
-      setNewAvailability(prev => ({
-        ...prev,
-        timeRanges: prev.timeRanges.filter((_, idx) => idx !== rangeIndex)
-      }));
-    }
-  };
-
   const validateNewAvailability = (): boolean => {
     const errors: Record<string, string> = {};
     let isValid = true;
 
-    if (!newAvailability.studentId) {
-      errors.studentId = 'Student ID required';
+    if (!newAvailability.teacherId) {
+      errors.teacherId = 'Teacher ID required';
       isValid = false;
     }
 
@@ -428,34 +376,41 @@ export function StudentAvailability() {
       isValid = false;
     }
 
-    const validRanges = newAvailability.timeRanges.filter(r => r.start && r.end);
-    if (validRanges.length === 0) {
-      errors.timeRanges = 'At least one time range required';
-      isValid = false;
-    }
-
-    // Check time range validity
-    newAvailability.timeRanges.forEach((range, idx) => {
-      if (range.start && range.end && range.start >= range.end) {
-        errors[`timeRange${idx}`] = 'End time must be after start time';
+    if (newAvailability.isAvailable) {
+      if (!newAvailability.startTime) {
+        errors.startTime = 'Start time required when available';
         isValid = false;
       }
-    });
+      if (!newAvailability.endTime) {
+        errors.endTime = 'End time required when available';
+        isValid = false;
+      }
+      if (newAvailability.startTime && newAvailability.endTime && 
+          newAvailability.startTime >= newAvailability.endTime) {
+        errors.time = 'End time must be after start time';
+        isValid = false;
+      }
+    }
 
-    // Check for duplicates
-    const duplicates = availability.filter(a => 
-      a.studentId === newAvailability.studentId &&
-      a.day === newAvailability.day &&
-      a.timeRanges.some(r1 => 
-        newAvailability.timeRanges.some(r2 => 
-          r1.start === r2.start && r1.end === r2.end
+    // Check for conflicts with existing availability
+    if (newAvailability.isAvailable && newAvailability.startTime && newAvailability.endTime) {
+      const conflicts = availability.filter(avail => 
+        avail.teacherId === newAvailability.teacherId &&
+        avail.day === newAvailability.day &&
+        avail.isAvailable &&
+        avail.startTime &&
+        avail.endTime &&
+        (
+          (newAvailability.startTime >= avail.startTime && newAvailability.startTime < avail.endTime) ||
+          (newAvailability.endTime > avail.startTime && newAvailability.endTime <= avail.endTime) ||
+          (newAvailability.startTime <= avail.startTime && newAvailability.endTime >= avail.endTime)
         )
-      )
-    );
+      );
 
-    if (duplicates.length > 0) {
-      errors.duplicate = 'Duplicate availability entry';
-      isValid = false;
+      if (conflicts.length > 0) {
+        errors.conflict = 'Time overlap with existing availability';
+        isValid = false;
+      }
     }
 
     setNewAvailabilityErrors(errors);
@@ -468,19 +423,24 @@ export function StudentAvailability() {
     }
 
     const newId = generateAvailabilityId();
-    const availToAdd = { ...newAvailability, id: newId, hasChanges: true };
-    setAvailability(prev => [...prev, availToAdd]);
+    const availToAdd: EditedAvailability = { 
+      ...newAvailability, 
+      id: newId, 
+      hasChanges: true,
+      hasConflict: false 
+    };
+    setAvailability(prev => detectConflicts([...prev, availToAdd]));
     
     // Reset modal
     setShowAddModal(false);
     setNewAvailability({
       id: '',
-      studentId: '',
-      studentName: '',
+      teacherId: '',
+      teacherName: '',
       day: '',
-      timeRanges: [{ start: '', end: '' }],
-      prefTeacherId: '',
-      teacherName: ''
+      startTime: '',
+      endTime: '',
+      isAvailable: true
     });
     setNewAvailabilityErrors({});
   };
@@ -489,12 +449,12 @@ export function StudentAvailability() {
     setShowAddModal(false);
     setNewAvailability({
       id: '',
-      studentId: '',
-      studentName: '',
+      teacherId: '',
+      teacherName: '',
       day: '',
-      timeRanges: [{ start: '', end: '' }],
-      prefTeacherId: '',
-      teacherName: ''
+      startTime: '',
+      endTime: '',
+      isAvailable: true
     });
     setNewAvailabilityErrors({});
   };
@@ -506,10 +466,10 @@ export function StudentAvailability() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Calendar className="size-6 text-blue-600" />
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Student Availability</h1>
+              <Clock className="size-6 text-blue-600" />
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Teacher Availability</h1>
             </div>
-            <p className="text-gray-600">Manage student preferred availability and teacher preferences</p>
+            <p className="text-gray-600">Manage teacher working hours and availability status</p>
           </div>
           
           <button
@@ -528,8 +488,8 @@ export function StudentAvailability() {
             <div className="text-sm text-blue-800">
               <p className="font-medium mb-1">Availability Management</p>
               <p>
-                Set student preferred availability windows for scheduling. Multiple time ranges can be added per day. 
-                Teacher preferences are optional but recommended for better scheduling results.
+                Define teacher working hours and availability status. Time inputs are required when status is "Available". 
+                The system automatically detects time conflicts for the same teacher on the same day.
               </p>
             </div>
           </div>
@@ -548,7 +508,7 @@ export function StudentAvailability() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Search Student ID / Name
+                  Search Teacher ID / Name
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
@@ -556,7 +516,7 @@ export function StudentAvailability() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="STU001 or Sarah Johnson..."
+                    placeholder="TCH001 or Dr. Ahmed Hassan..."
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   />
                 </div>
@@ -580,34 +540,33 @@ export function StudentAvailability() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Filter by Teacher
+                  Filter by Status
                 </label>
                 <select
-                  value={selectedTeacher}
-                  onChange={(e) => setSelectedTeacher(e.target.value)}
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
-                  <option value="">All Teachers</option>
-                  {teachers.map(teacher => (
-                    <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-                  ))}
+                  <option value="">All Status</option>
+                  <option value="available">Available</option>
+                  <option value="unavailable">Not Available</option>
                 </select>
               </div>
             </div>
 
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Filter by Stage
+                Filter by Subject
               </label>
               <select
-                value={selectedStage}
-                onChange={(e) => setSelectedStage(e.target.value)}
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
                 className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
               >
-                <option value="">All Stages</option>
-                <option value="Elementary">Elementary</option>
-                <option value="Mid">Mid</option>
-                <option value="High School">High School</option>
+                <option value="">All Subjects</option>
+                {subjects.map(subject => (
+                  <option key={subject} value={subject}>{subject}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -619,12 +578,12 @@ export function StudentAvailability() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Student ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Student Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Day</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Preferred Hours</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Pref. Teacher</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Teacher ID</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Teacher Name</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Day</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Start Time</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">End Time</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Status</th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Actions</th>
                 </tr>
               </thead>
@@ -635,22 +594,24 @@ export function StudentAvailability() {
                     className={`transition-colors ${
                       avail.hasChanges 
                         ? 'bg-yellow-50' 
-                        : !avail.prefTeacherId 
-                          ? 'bg-orange-50' 
-                          : 'hover:bg-gray-50'
+                        : avail.hasConflict
+                          ? 'bg-red-50'
+                          : avail.isAvailable 
+                            ? 'bg-green-50' 
+                            : 'bg-gray-50 hover:bg-gray-100'
                     }`}
                   >
-                    {/* Student ID - Read-only */}
+                    {/* Teacher ID - Read-only */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="font-mono text-sm text-gray-900">{avail.studentId}</span>
-                      {errors[avail.id]?.studentId && (
-                        <p className="text-xs text-red-600 mt-0.5">{errors[avail.id].studentId}</p>
+                      <span className="font-mono text-sm text-gray-900">{avail.teacherId}</span>
+                      {errors[avail.id]?.teacherId && (
+                        <p className="text-xs text-red-600 mt-0.5">{errors[avail.id].teacherId}</p>
                       )}
                     </td>
 
-                    {/* Student Name - Auto-filled */}
+                    {/* Teacher Name - Auto-filled */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 font-medium">{avail.studentName}</span>
+                      <span className="text-sm text-gray-900 font-medium">{avail.teacherName}</span>
                     </td>
 
                     {/* Day - Editable */}
@@ -676,76 +637,77 @@ export function StudentAvailability() {
                       )}
                     </td>
 
-                    {/* Preferred Hours - Time Ranges */}
-                    <td className="px-4 py-3">
-                      <div className="space-y-2">
-                        {avail.timeRanges.map((range, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
-                            <input
-                              type="time"
-                              value={range.start}
-                              onChange={(e) => handleTimeRangeChange(avail.id, idx, 'start', e.target.value)}
-                              className={`px-2 py-1 border rounded text-sm ${
-                                avail.hasChanges
-                                  ? 'border-yellow-300 bg-yellow-50'
-                                  : 'border-gray-300 bg-white'
-                              } focus:ring-2 focus:ring-blue-500`}
-                            />
-                            <span className="text-gray-500">–</span>
-                            <input
-                              type="time"
-                              value={range.end}
-                              onChange={(e) => handleTimeRangeChange(avail.id, idx, 'end', e.target.value)}
-                              className={`px-2 py-1 border rounded text-sm ${
-                                avail.hasChanges
-                                  ? 'border-yellow-300 bg-yellow-50'
-                                  : 'border-gray-300 bg-white'
-                              } focus:ring-2 focus:ring-blue-500`}
-                            />
-                            {avail.timeRanges.length > 1 && (
-                              <button
-                                onClick={() => removeTimeRange(avail.id, idx)}
-                                className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                              >
-                                <X className="size-4" />
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          onClick={() => addTimeRange(avail.id)}
-                          className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-                        >
-                          <Plus className="size-3" />
-                          Add Time Range
-                        </button>
-                        {errors[avail.id]?.timeRanges && (
-                          <p className="text-xs text-red-600">{errors[avail.id].timeRanges}</p>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Pref Teacher - Editable */}
+                    {/* Start Time - Editable */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <select
-                        value={avail.prefTeacherId}
-                        onChange={(e) => handleFieldChange(avail.id, 'prefTeacherId', e.target.value)}
+                      <input
+                        type="time"
+                        value={avail.startTime}
+                        onChange={(e) => handleFieldChange(avail.id, 'startTime', e.target.value)}
+                        disabled={!avail.isAvailable}
                         className={`px-3 py-1.5 border rounded text-sm ${
-                          avail.hasChanges
-                            ? 'border-yellow-300 bg-yellow-50'
-                            : 'border-gray-300 bg-white'
-                        } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                      >
-                        <option value="">None</option>
-                        {teachers.map(teacher => (
-                          <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-                        ))}
-                      </select>
+                          !avail.isAvailable
+                            ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                            : errors[avail.id]?.startTime
+                              ? 'border-red-300 bg-red-50'
+                              : avail.hasChanges
+                                ? 'border-yellow-300 bg-yellow-50'
+                                : 'border-gray-300 bg-white'
+                        } focus:ring-2 focus:ring-blue-500`}
+                      />
+                      {errors[avail.id]?.startTime && (
+                        <p className="text-xs text-red-600 mt-0.5">{errors[avail.id].startTime}</p>
+                      )}
                     </td>
 
-                    {/* Teacher Name - Auto-filled */}
+                    {/* End Time - Editable */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-sm text-gray-700">{avail.teacherName || '—'}</span>
+                      <input
+                        type="time"
+                        value={avail.endTime}
+                        onChange={(e) => handleFieldChange(avail.id, 'endTime', e.target.value)}
+                        disabled={!avail.isAvailable}
+                        className={`px-3 py-1.5 border rounded text-sm ${
+                          !avail.isAvailable
+                            ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                            : errors[avail.id]?.endTime || errors[avail.id]?.time
+                              ? 'border-red-300 bg-red-50'
+                              : avail.hasChanges
+                                ? 'border-yellow-300 bg-yellow-50'
+                                : 'border-gray-300 bg-white'
+                        } focus:ring-2 focus:ring-blue-500`}
+                      />
+                      {(errors[avail.id]?.endTime || errors[avail.id]?.time) && (
+                        <p className="text-xs text-red-600 mt-0.5">
+                          {errors[avail.id].endTime || errors[avail.id].time}
+                        </p>
+                      )}
+                    </td>
+
+                    {/* Is Available - Toggle */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <button
+                        onClick={() => handleFieldChange(avail.id, 'isAvailable', !avail.isAvailable)}
+                        className={`relative inline-flex items-center h-6 w-11 rounded-full transition-colors ${
+                          avail.isAvailable ? 'bg-green-600' : 'bg-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block size-4 transform rounded-full bg-white transition-transform ${
+                            avail.isAvailable ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <span className={`ml-2 text-xs font-medium ${
+                        avail.isAvailable ? 'text-green-700' : 'text-gray-600'
+                      }`}>
+                        {avail.isAvailable ? 'Available' : 'Not Available'}
+                      </span>
+                      {avail.hasConflict && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <AlertTriangle className="size-3 text-red-600" />
+                          <span className="text-xs text-red-600">Conflict</span>
+                        </div>
+                      )}
                     </td>
 
                     {/* Actions */}
@@ -774,7 +736,7 @@ export function StudentAvailability() {
             {/* Empty State */}
             {filteredAvailability.length === 0 && (
               <div className="text-center py-12 bg-gray-50">
-                <Calendar className="size-12 text-gray-300 mx-auto mb-3" />
+                <Clock className="size-12 text-gray-300 mx-auto mb-3" />
                 <h3 className="font-medium text-gray-900 mb-1">No availability found</h3>
                 <p className="text-gray-600 text-sm">Try adjusting your filters or add new availability</p>
               </div>
@@ -785,8 +747,16 @@ export function StudentAvailability() {
           <div className="border-t border-gray-200 bg-gray-50 px-4 py-3">
             <div className="flex items-center gap-6 text-xs">
               <div className="flex items-center gap-2">
-                <div className="size-4 bg-orange-50 border border-orange-200 rounded"></div>
-                <span className="text-gray-600">No teacher preference</span>
+                <div className="size-4 bg-green-50 border border-green-200 rounded"></div>
+                <span className="text-gray-600">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="size-4 bg-gray-50 border border-gray-200 rounded"></div>
+                <span className="text-gray-600">Not Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="size-4 bg-red-50 border border-red-200 rounded"></div>
+                <span className="text-gray-600">Time Conflict</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="size-4 bg-yellow-50 border border-yellow-200 rounded"></div>
@@ -849,7 +819,7 @@ export function StudentAvailability() {
                 </div>
                 
                 <p className="text-gray-700 mb-6">
-                  Saving availability changes will update student scheduling preferences. 
+                  Saving availability changes will update teacher working hours and schedules. 
                   Are you sure you want to proceed?
                 </p>
                 
@@ -889,46 +859,46 @@ export function StudentAvailability() {
                     <Plus className="size-6 text-blue-700" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-lg">Add Student Availability</h3>
-                    <p className="text-sm text-gray-600">Set preferred time windows for student</p>
+                    <h3 className="font-semibold text-gray-900 text-lg">Add Teacher Availability</h3>
+                    <p className="text-sm text-gray-600">Define working hours and availability status</p>
                   </div>
                 </div>
                 
                 <div className="space-y-4">
-                  {/* Student Selection */}
+                  {/* Teacher Selection */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Student ID *
+                        Teacher ID *
                       </label>
                       <select
-                        value={newAvailability.studentId}
-                        onChange={(e) => handleNewAvailabilityFieldChange('studentId', e.target.value)}
+                        value={newAvailability.teacherId}
+                        onChange={(e) => handleNewAvailabilityFieldChange('teacherId', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-lg text-sm ${
-                          newAvailabilityErrors.studentId
+                          newAvailabilityErrors.teacherId
                             ? 'border-red-300 bg-red-50'
                             : 'border-gray-300 bg-white'
                         } focus:ring-2 focus:ring-blue-500`}
                       >
-                        <option value="">Select Student</option>
-                        {students.map(student => (
-                          <option key={student.id} value={student.id}>
-                            {student.id} - {student.name}
+                        <option value="">Select Teacher</option>
+                        {teachers.map(teacher => (
+                          <option key={teacher.id} value={teacher.id}>
+                            {teacher.id} - {teacher.name}
                           </option>
                         ))}
                       </select>
-                      {newAvailabilityErrors.studentId && (
-                        <p className="text-xs text-red-600 mt-1">{newAvailabilityErrors.studentId}</p>
+                      {newAvailabilityErrors.teacherId && (
+                        <p className="text-xs text-red-600 mt-1">{newAvailabilityErrors.teacherId}</p>
                       )}
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Student Name
+                        Teacher Name
                       </label>
                       <input
                         type="text"
-                        value={newAvailability.studentName}
+                        value={newAvailability.teacherName}
                         readOnly
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700"
                       />
@@ -959,87 +929,96 @@ export function StudentAvailability() {
                     )}
                   </div>
 
-                  {/* Time Ranges */}
+                  {/* Availability Status */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Preferred Hours *
+                      Availability Status
                     </label>
-                    <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
-                      {newAvailability.timeRanges.map((range, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                          <Clock className="size-4 text-gray-400" />
-                          <input
-                            type="time"
-                            value={range.start}
-                            onChange={(e) => handleNewTimeRangeChange(idx, 'start', e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500"
-                          />
-                          <span className="text-gray-500 font-medium">–</span>
-                          <input
-                            type="time"
-                            value={range.end}
-                            onChange={(e) => handleNewTimeRangeChange(idx, 'end', e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500"
-                          />
-                          {newAvailability.timeRanges.length > 1 && (
-                            <button
-                              onClick={() => removeNewTimeRange(idx)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
-                            >
-                              <Trash2 className="size-4" />
-                            </button>
-                          )}
-                        </div>
-                      ))}
+                    <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
                       <button
-                        onClick={addNewTimeRange}
-                        className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
+                        onClick={() => handleNewAvailabilityFieldChange('isAvailable', !newAvailability.isAvailable)}
+                        className={`relative inline-flex items-center h-7 w-12 rounded-full transition-colors ${
+                          newAvailability.isAvailable ? 'bg-green-600' : 'bg-gray-300'
+                        }`}
                       >
-                        <Plus className="size-4" />
-                        Add Another Time Range
+                        <span
+                          className={`inline-block size-5 transform rounded-full bg-white transition-transform ${
+                            newAvailability.isAvailable ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
                       </button>
+                      <div>
+                        <p className={`text-sm font-medium ${
+                          newAvailability.isAvailable ? 'text-green-700' : 'text-gray-600'
+                        }`}>
+                          {newAvailability.isAvailable ? 'Available' : 'Not Available'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {newAvailability.isAvailable 
+                            ? 'Time inputs required' 
+                            : 'Time inputs disabled'}
+                        </p>
+                      </div>
                     </div>
-                    {newAvailabilityErrors.timeRanges && (
-                      <p className="text-xs text-red-600 mt-1">{newAvailabilityErrors.timeRanges}</p>
-                    )}
                   </div>
 
-                  {/* Teacher Preference */}
+                  {/* Time Range */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Preferred Teacher (Optional)
+                        Start Time {newAvailability.isAvailable && '*'}
                       </label>
-                      <select
-                        value={newAvailability.prefTeacherId}
-                        onChange={(e) => handleNewAvailabilityFieldChange('prefTeacherId', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">No Preference</option>
-                        {teachers.map(teacher => (
-                          <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-                        ))}
-                      </select>
+                      <input
+                        type="time"
+                        value={newAvailability.startTime}
+                        onChange={(e) => handleNewAvailabilityFieldChange('startTime', e.target.value)}
+                        disabled={!newAvailability.isAvailable}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm ${
+                          !newAvailability.isAvailable
+                            ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                            : newAvailabilityErrors.startTime
+                              ? 'border-red-300 bg-red-50'
+                              : 'border-gray-300 bg-white'
+                        } focus:ring-2 focus:ring-blue-500`}
+                      />
+                      {newAvailabilityErrors.startTime && (
+                        <p className="text-xs text-red-600 mt-1">{newAvailabilityErrors.startTime}</p>
+                      )}
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Teacher Name
+                        End Time {newAvailability.isAvailable && '*'}
                       </label>
                       <input
-                        type="text"
-                        value={newAvailability.teacherName}
-                        readOnly
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700"
+                        type="time"
+                        value={newAvailability.endTime}
+                        onChange={(e) => handleNewAvailabilityFieldChange('endTime', e.target.value)}
+                        disabled={!newAvailability.isAvailable}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm ${
+                          !newAvailability.isAvailable
+                            ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                            : newAvailabilityErrors.endTime || newAvailabilityErrors.time
+                              ? 'border-red-300 bg-red-50'
+                              : 'border-gray-300 bg-white'
+                        } focus:ring-2 focus:ring-blue-500`}
                       />
+                      {(newAvailabilityErrors.endTime || newAvailabilityErrors.time) && (
+                        <p className="text-xs text-red-600 mt-1">
+                          {newAvailabilityErrors.endTime || newAvailabilityErrors.time}
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Duplicate/Error Message */}
-                  {newAvailabilityErrors.duplicate && (
+                  {/* Conflict Message */}
+                  {newAvailabilityErrors.conflict && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
                       <AlertTriangle className="size-5 text-red-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-red-700">{newAvailabilityErrors.duplicate}</p>
+                      <div>
+                        <p className="text-sm font-medium text-red-700">Time Conflict Detected</p>
+                        <p className="text-sm text-red-600 mt-0.5">{newAvailabilityErrors.conflict}</p>
+                      </div>
                     </div>
                   )}
                 </div>

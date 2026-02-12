@@ -13,6 +13,7 @@ import { StudentsListFull } from "./components/students/StudentsListFull";
 import { StudentDetails } from "./components/students/StudentDetails";
 import { TeachersListFull } from "./components/teachers/TeachersListFull";
 import { TeacherDetails } from "./components/teachers/TeacherDetails";
+import { TeacherAvailability } from "./components/TeacherAvailability";
 import { ParentsList } from "./components/parents/ParentsList";
 import { ParentDetails } from "./components/parents/ParentDetails";
 import { PaymentsList } from "./components/payments/PaymentsList";
@@ -41,7 +42,10 @@ export const router = createBrowserRouter([
       { path: "teachers", Component: TeachersListFull },
       { path: "teachers/new", Component: TeacherRegistration },
       { path: "teachers/:id", Component: TeacherDetails },
+      { path: "teachers/:id/availability", Component: TeacherAvailability },
       { path: "availability", Component: AvailabilityManagement },
+      { path: "student-availability", Component: StudentAvailability },
+      { path: "teacher-availability", Component: TeacherAvailability },
       { path: "matching", Component: MatchingScheduling },
       { path: "schedule", Component: LessonSchedule },
       { path: "lessons/:id", Component: LessonDetails },
