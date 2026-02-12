@@ -18,6 +18,7 @@ import { ParentsList } from "./components/parents/ParentsList";
 import { ParentDetails } from "./components/parents/ParentDetails";
 import { PaymentsList } from "./components/payments/PaymentsList";
 import { PaymentDetails } from "./components/payments/PaymentDetails";
+import { PaymentsManagement } from "./components/PaymentsManagement";
 import { CompletedLessonsList } from "./components/lessons/CompletedLessonsList";
 import { CompletedLessonDetails } from "./components/lessons/CompletedLessonDetails";
 import { LessonDetails } from "./components/lessons/LessonDetails";
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
       { path: "lessons/completed/:id", Component: CompletedLessonDetails },
       { path: "payments", Component: PaymentsList },
       { path: "payments/:id", Component: PaymentDetails },
+      { path: "payments/management", Component: PaymentsManagement },
       { path: "finance", Component: Finance },
       { path: "subjects", Component: Subjects },
       { path: "diagnostics", Component: Diagnostics },
