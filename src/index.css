@@ -565,6 +565,10 @@
     left: 120px;
   }
 
+  .left-\[140px\] {
+    left: 140px;
+  }
+
   .z-10 {
     z-index: 10;
   }

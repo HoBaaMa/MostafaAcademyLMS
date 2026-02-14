@@ -18,6 +18,8 @@ import {
 type Student = {
   id: string;
   name: string;
+  email: string;
+  phone: string;
   stage: string;
   country: string;
   city: string;
@@ -59,6 +61,8 @@ export function StudentsListFull() {
     {
       id: 'MID123456',
       name: 'Ahmed Al-Saud',
+      email: 'ahmed@example.com',
+      phone: '+966555123456',
       stage: 'Grade 10',
       country: 'Saudi Arabia',
       city: 'Riyadh',
@@ -84,6 +88,8 @@ export function StudentsListFull() {
     {
       id: 'MID234567',
       name: 'Fatima Hassan',
+      email: 'fatima@example.com',
+      phone: '+971555123456',
       stage: 'Grade 8',
       country: 'UAE',
       city: 'Dubai',
@@ -109,6 +115,8 @@ export function StudentsListFull() {
     {
       id: 'MID345678',
       name: 'Mohammed Ali',
+      email: 'mohammed@example.com',
+      phone: '+201012345678',
       stage: 'Grade 12',
       country: 'Egypt',
       city: 'Cairo',
@@ -417,7 +425,9 @@ export function StudentsListFull() {
                   <th className="sticky left-0 bg-gray-50 z-20 text-left px-4 py-3 text-xs font-medium text-gray-700 border-r border-gray-200">
                     Student ID
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[150px]">Name</th>
+                  <th className="sticky left-[140px] bg-gray-50 z-20 text-left px-4 py-3 text-xs font-medium text-gray-700 border-r border-gray-200 min-w-[150px]">Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[200px]">Email</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[150px]">Phone</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[120px]">Stage</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[120px]">Country</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[100px]">City</th>
@@ -471,6 +481,34 @@ export function StudentsListFull() {
                           />
                         ) : (
                           <span className="text-gray-900">{student.name}</span>
+                        )}
+                      </td>
+
+                      {/* Email */}
+                      <td className="px-4 py-3 text-sm">
+                        {isEditing ? (
+                          <input
+                            type="email"
+                            value={getCellValue(student, 'email')}
+                            onChange={(e) => handleCellChange(student.id, 'email', e.target.value)}
+                            className="w-full px-2 py-1 border border-blue-300 rounded focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                        ) : (
+                          <span className="text-gray-900">{student.email}</span>
+                        )}
+                      </td>
+
+                      {/* Phone */}
+                      <td className="px-4 py-3 text-sm">
+                        {isEditing ? (
+                          <input
+                            type="tel"
+                            value={getCellValue(student, 'phone')}
+                            onChange={(e) => handleCellChange(student.id, 'phone', e.target.value)}
+                            className="w-full px-2 py-1 border border-blue-300 rounded focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                        ) : (
+                          <span className="text-gray-900">{student.phone}</span>
                         )}
                       </td>
 
