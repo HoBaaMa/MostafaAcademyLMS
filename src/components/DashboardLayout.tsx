@@ -21,7 +21,8 @@ import {
   XCircle,
   Terminal,
   TrendingUp,
-  UserX
+  UserX,
+  UserPlus
 } from 'lucide-react';
 
 type NavItem = {
@@ -66,10 +67,11 @@ export function DashboardLayout() {
         { number: '10', name: 'Completed Lessons', path: '/lessons/completed', icon: CheckCircle },
         { number: '11', name: 'Canceled Lessons', path: '/lessons/canceled', icon: XCircle },
         { number: '12', name: 'Active Students (3-4)', path: '/active-students-report', icon: TrendingUp },
-        { number: '13', name: 'Dropped Students', path: '/dropped-students-report', icon: UserX },
-        { number: '14', name: 'Payments', path: '/payments', icon: Receipt },
-        { number: '15', name: 'Finance', path: '/finance', icon: DollarSign },
-        { number: '16', name: 'Diagnostics', path: '/diagnostics', icon: Activity },
+        { number: '13', name: 'New Students', path: '/new-students-report', icon: UserPlus },
+        { number: '14', name: 'Dropped Students', path: '/dropped-students-report', icon: UserX },
+        { number: '15', name: 'Payments', path: '/payments', icon: Receipt },
+        { number: '16', name: 'Finance', path: '/finance', icon: DollarSign },
+        { number: '17', name: 'Diagnostics', path: '/diagnostics', icon: Activity },
       ]
     }
   ];

@@ -29,6 +29,7 @@ import { Subjects } from "./components/Subjects";
 import { Menus } from "./components/Menus";
 import { ActiveStudentsReport } from "./components/ActiveStudentsReport";
 import { DroppedStudentsReport } from "./components/DroppedStudentsReport";
+import { NewStudentsReport } from "./components/NewStudentsReport";
 import { Diagnostics } from "./components/Diagnostics";
 import { Settings } from "./components/Settings";
 
@@ -67,6 +68,7 @@ export const router = createBrowserRouter([
       { path: "menus", Component: Menus },
       { path: "active-students-report", Component: ActiveStudentsReport },
       { path: "dropped-students-report", Component: DroppedStudentsReport },
+      { path: "new-students-report", Component: NewStudentsReport },
       { path: "diagnostics", Component: Diagnostics },
       { path: "settings", Component: Settings },
     ],
