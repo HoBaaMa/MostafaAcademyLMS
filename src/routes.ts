@@ -24,9 +24,9 @@ import { CompletedLessonsList } from "./components/lessons/CompletedLessonsList"
 import { CompletedLessonDetails } from "./components/lessons/CompletedLessonDetails";
 import { CanceledLessons } from "./components/lessons/CanceledLessons";
 import { LessonDetails } from "./components/lessons/LessonDetails";
-import { Finance } from "./components/Finance";
 import { FinanceDashboard } from "./components/FinanceDashboard";
 import { Subjects } from "./components/Subjects";
+import { Menus } from "./components/Menus";
 import { Diagnostics } from "./components/Diagnostics";
 import { Settings } from "./components/Settings";
 
@@ -62,6 +62,7 @@ export const router = createBrowserRouter([
       { path: "payments/management", Component: PaymentsManagement },
       { path: "finance", Component: FinanceDashboard },
       { path: "subjects", Component: Subjects },
+      { path: "menus", Component: Menus },
       { path: "diagnostics", Component: Diagnostics },
       { path: "settings", Component: Settings },
     ],

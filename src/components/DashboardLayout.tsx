@@ -18,7 +18,8 @@ import {
   UserCheck,
   CreditCard,
   CalendarCheck,
-  XCircle
+  XCircle,
+  Terminal
 } from 'lucide-react';
 
 type NavItem = {
@@ -169,7 +170,18 @@ export function DashboardLayout() {
         </nav>
 
         {/* Settings */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className="p-4 border-t border-gray-200 bg-gray-50 space-y-2">
+          <Link
+            to="/menus"
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+              isActive('/menus')
+                ? 'bg-purple-600 text-white'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Terminal className="size-5 flex-shrink-0" />
+            <span className="font-medium text-sm">Menus</span>
+          </Link>
           <Link
             to="/settings"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
