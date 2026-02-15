@@ -22,6 +22,7 @@ import { PaymentDetails } from "./components/payments/PaymentDetails";
 import { PaymentsManagement } from "./components/PaymentsManagement";
 import { CompletedLessonsList } from "./components/lessons/CompletedLessonsList";
 import { CompletedLessonDetails } from "./components/lessons/CompletedLessonDetails";
+import { CanceledLessons } from "./components/lessons/CanceledLessons";
 import { LessonDetails } from "./components/lessons/LessonDetails";
 import { Finance } from "./components/Finance";
 import { FinanceDashboard } from "./components/FinanceDashboard";
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
       { path: "lessons/:id", Component: LessonDetails },
       { path: "lessons/completed", Component: CompletedLessonsList },
       { path: "lessons/completed/:id", Component: CompletedLessonDetails },
+      { path: "lessons/canceled", Component: CanceledLessons },
       { path: "payments", Component: PaymentsList },
       { path: "payments/:id", Component: PaymentDetails },
       { path: "payments/management", Component: PaymentsManagement },

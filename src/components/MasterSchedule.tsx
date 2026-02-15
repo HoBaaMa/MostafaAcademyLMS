@@ -4,331 +4,263 @@ import {
   Clock,
   Filter,
   Search,
-  CheckCircle,
-  XCircle,
   Globe,
   AlertCircle,
-  BookOpen,
-  User,
   Save,
   X as XIcon,
-  Eye
+  Bell
 } from 'lucide-react';
 
 type LessonStatus = 'Scheduled' | 'Confirmed' | 'Completed' | 'Cancelled';
 
-type Lesson = {
-  id: string;
+type MasterLesson = {
+  date: string;
+  day: string;
+  studentId: string;
   studentName: string;
-  teacherName: string;
-  teacherId: string;
+  grade: string;
   subject: string;
-  datePH: string;
-  dateCA: string;
-  startTime: string;
+  startStudent: string;
+  endStudent: string;
+  startTeacher: string;
+  endTeacher: string;
+  studentTZ: string;
+  teacherTZ: string;
+  actualStudentTime: string;
+  adminAlertCairo: 'ok' | 'warning';
+  cairoTime: string;
   status: LessonStatus;
-  isConfirmed: boolean;
-  confirmedBy: string;
-  confirmedDate: string;
+  lessonId: string;
+  teacherId: string;
+  teacherName: string;
+  teacherCountry: string;
 };
 
-type EditedLesson = Lesson & { hasChanges?: boolean };
-
 export function MasterSchedule() {
-  const [viewTimezone, setViewTimezone] = useState<'PH' | 'CA'>('PH');
+  const [timeView, setTimeView] = useState<'student' | 'teacher' | 'cairo'>('student');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTeacher, setSelectedTeacher] = useState('');
-  const [selectedDay, setSelectedDay] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedConfirmed, setSelectedConfirmed] = useState('');
+  const [teacherFilter, setTeacherFilter] = useState('');
+  const [studentFilter, setStudentFilter] = useState('');
+  const [gradeFilter, setGradeFilter] = useState('');
+  const [subjectFilter, setSubjectFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [editedData, setEditedData] = useState<Record<string, Partial<MasterLesson>>>({});
+  
+  const today = '2024-02-15';
   
   // Mock data
-  const initialLessons: Lesson[] = [
+  const [lessons, setLessons] = useState<MasterLesson[]>([
     {
-      id: 'LSN001',
-      studentName: 'Sarah Johnson',
-      teacherName: 'Dr. Ahmed Hassan',
-      teacherId: 'TCH001',
+      date: '2024-02-15',
+      day: 'Thursday',
+      studentId: 'MID123456',
+      studentName: 'Ahmed Al-Saud',
+      grade: 'Grade 10',
       subject: 'Mathematics',
-      datePH: '2026-02-15',
-      dateCA: '2026-02-14',
-      startTime: '14:00',
+      startStudent: '16:00',
+      endStudent: '17:00',
+      startTeacher: '21:00',
+      endTeacher: '22:00',
+      studentTZ: 'UTC+3',
+      teacherTZ: 'UTC+8',
+      actualStudentTime: '16:00 - 17:00',
+      adminAlertCairo: 'ok',
+      cairoTime: '15:00',
       status: 'Confirmed',
-      isConfirmed: true,
-      confirmedBy: 'Admin User',
-      confirmedDate: '2026-02-10'
-    },
-    {
-      id: 'LSN002',
-      studentName: 'Michael Chen',
-      teacherName: 'Prof. Fatima Al-Sayed',
-      teacherId: 'TCH002',
-      subject: 'Physics',
-      datePH: '2026-02-15',
-      dateCA: '2026-02-15',
-      startTime: '16:00',
-      status: 'Scheduled',
-      isConfirmed: false,
-      confirmedBy: '',
-      confirmedDate: ''
-    },
-    {
-      id: 'LSN003',
-      studentName: 'Emily Rodriguez',
-      teacherName: 'Dr. Ahmed Hassan',
+      lessonId: 'LSN789012',
       teacherId: 'TCH001',
-      subject: 'Algebra',
-      datePH: '2026-02-16',
-      dateCA: '2026-02-15',
-      startTime: '10:00',
-      status: 'Completed',
-      isConfirmed: true,
-      confirmedBy: 'Admin User',
-      confirmedDate: '2026-02-12'
+      teacherName: 'Sarah Johnson',
+      teacherCountry: 'Philippines'
     },
     {
-      id: 'LSN004',
-      studentName: 'Omar Abdullah',
-      teacherName: 'Mr. John Smith',
-      teacherId: 'TCH003',
+      date: '2024-02-15',
+      day: 'Thursday',
+      studentId: 'MID234567',
+      studentName: 'Fatima Hassan',
+      grade: 'Grade 8',
       subject: 'English',
-      datePH: '2026-02-16',
-      dateCA: '2026-02-16',
-      startTime: '15:00',
-      status: 'Cancelled',
-      isConfirmed: true,
-      confirmedBy: 'Teacher Portal',
-      confirmedDate: '2026-02-11'
-    },
-    {
-      id: 'LSN005',
-      studentName: 'Layla Hassan',
-      teacherName: 'Ms. Maria Garcia',
-      teacherId: 'TCH004',
-      subject: 'Chemistry',
-      datePH: '2026-02-17',
-      dateCA: '2026-02-16',
-      startTime: '09:00',
-      status: 'Scheduled',
-      isConfirmed: false,
-      confirmedBy: '',
-      confirmedDate: ''
-    },
-    {
-      id: 'LSN006',
-      studentName: 'Ahmed Al-Mansoori',
-      teacherName: 'Prof. Fatima Al-Sayed',
+      startStudent: '18:00',
+      endStudent: '18:45',
+      startTeacher: '22:00',
+      endTeacher: '22:45',
+      studentTZ: 'UTC+4',
+      teacherTZ: 'UTC+8',
+      actualStudentTime: '18:00 - 18:45',
+      adminAlertCairo: 'ok',
+      cairoTime: '16:00',
+      status: 'Confirmed',
+      lessonId: 'LSN789013',
       teacherId: 'TCH002',
+      teacherName: 'Michael Chen',
+      teacherCountry: 'Philippines'
+    },
+    {
+      date: '2024-02-15',
+      day: 'Thursday',
+      studentId: 'MID345678',
+      studentName: 'Mohammed Ali',
+      grade: 'Grade 12',
       subject: 'Physics',
-      datePH: '2026-02-17',
-      dateCA: '2026-02-17',
-      startTime: '13:00',
-      status: 'Confirmed',
-      isConfirmed: true,
-      confirmedBy: 'Admin User',
-      confirmedDate: '2026-02-13'
-    },
-    {
-      id: 'LSN007',
-      studentName: 'Sarah Johnson',
-      teacherName: 'Dr. Ahmed Hassan',
-      teacherId: 'TCH001',
-      subject: 'Calculus',
-      datePH: '2026-02-18',
-      dateCA: '2026-02-17',
-      startTime: '14:00',
+      startStudent: '23:00',
+      endStudent: '00:00',
+      startTeacher: '08:00',
+      endTeacher: '09:00',
+      studentTZ: 'UTC+2',
+      teacherTZ: 'UTC-5',
+      actualStudentTime: '23:00 - 00:00',
+      adminAlertCairo: 'warning',
+      cairoTime: '23:00',
       status: 'Scheduled',
-      isConfirmed: false,
-      confirmedBy: '',
-      confirmedDate: ''
-    },
-    {
-      id: 'LSN008',
-      studentName: 'Michael Chen',
-      teacherName: 'Mr. John Smith',
+      lessonId: 'LSN789014',
       teacherId: 'TCH003',
-      subject: 'Literature',
-      datePH: '2026-02-18',
-      dateCA: '2026-02-18',
-      startTime: '11:00',
+      teacherName: 'Emily Rodriguez',
+      teacherCountry: 'Canada'
+    },
+    {
+      date: '2024-02-16',
+      day: 'Friday',
+      studentId: 'MID456789',
+      studentName: 'Layla Mahmoud',
+      grade: 'Grade 11',
+      subject: 'Chemistry',
+      startStudent: '17:00',
+      endStudent: '17:45',
+      startTeacher: '22:00',
+      endTeacher: '22:45',
+      studentTZ: 'UTC+3',
+      teacherTZ: 'UTC+8',
+      actualStudentTime: '17:00 - 17:45',
+      adminAlertCairo: 'ok',
+      cairoTime: '16:00',
       status: 'Confirmed',
-      isConfirmed: true,
-      confirmedBy: 'Teacher Portal',
-      confirmedDate: '2026-02-14'
+      lessonId: 'LSN789015',
+      teacherId: 'TCH001',
+      teacherName: 'Sarah Johnson',
+      teacherCountry: 'Philippines'
     },
     {
-      id: 'LSN009',
-      studentName: 'Emily Rodriguez',
-      teacherName: 'Ms. Maria Garcia',
-      teacherId: 'TCH004',
-      subject: 'Organic Chemistry',
-      datePH: '2026-02-19',
-      dateCA: '2026-02-18',
-      startTime: '10:00',
+      date: '2024-02-16',
+      day: 'Friday',
+      studentId: 'MID567890',
+      studentName: 'Omar Khalid',
+      grade: 'Grade 9',
+      subject: 'Computer Science',
+      startStudent: '19:00',
+      endStudent: '20:00',
+      startTeacher: '23:00',
+      endTeacher: '00:00',
+      studentTZ: 'UTC+4',
+      teacherTZ: 'UTC+8',
+      actualStudentTime: '19:00 - 20:00',
+      adminAlertCairo: 'ok',
+      cairoTime: '17:00',
       status: 'Completed',
-      isConfirmed: true,
-      confirmedBy: 'Admin User',
-      confirmedDate: '2026-02-15'
+      lessonId: 'LSN789016',
+      teacherId: 'TCH004',
+      teacherName: 'David Thompson',
+      teacherCountry: 'Philippines'
     },
-    {
-      id: 'LSN010',
-      studentName: 'Omar Abdullah',
-      teacherName: 'Prof. Fatima Al-Sayed',
-      teacherId: 'TCH002',
-      subject: 'Mechanics',
-      datePH: '2026-02-19',
-      dateCA: '2026-02-19',
-      startTime: '16:00',
-      status: 'Scheduled',
-      isConfirmed: false,
-      confirmedBy: '',
-      confirmedDate: ''
-    }
-  ];
+  ]);
 
   const teachers = [
-    { id: 'TCH001', name: 'Dr. Ahmed Hassan' },
-    { id: 'TCH002', name: 'Prof. Fatima Al-Sayed' },
-    { id: 'TCH003', name: 'Mr. John Smith' },
-    { id: 'TCH004', name: 'Ms. Maria Garcia' }
+    { id: 'TCH001', name: 'Sarah Johnson' },
+    { id: 'TCH002', name: 'Michael Chen' },
+    { id: 'TCH003', name: 'Emily Rodriguez' },
+    { id: 'TCH004', name: 'David Thompson' }
   ];
 
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const grades = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 
+                  'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
+  
+  const subjects = ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Computer Science'];
 
-  const [lessons, setLessons] = useState<EditedLesson[]>(initialLessons);
+  // Check if lesson is happening today
+  const isToday = (date: string) => date === today;
 
-  const hasChanges = lessons.some(l => l.hasChanges);
-
-  const getDayOfWeek = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return days[date.getDay()];
+  // Check if lesson is within next hour (simplified for demo)
+  const isUpcoming = (date: string, time: string) => {
+    return isToday(date); // Simplified - would normally check actual time
   };
 
-  const formatDate = (dateStr: string): string => {
-    if (!dateStr) return '—';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+  // Filter logic
+  const filteredLessons = lessons.filter(lesson => {
+    const matchesSearch = 
+      searchQuery === '' ||
+      lesson.lessonId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lesson.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lesson.studentName.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesTeacher = !teacherFilter || lesson.teacherId === teacherFilter;
+    const matchesStudent = !studentFilter || 
+      lesson.studentId.includes(studentFilter) || 
+      lesson.studentName.toLowerCase().includes(studentFilter.toLowerCase());
+    const matchesGrade = !gradeFilter || lesson.grade === gradeFilter;
+    const matchesSubject = !subjectFilter || lesson.subject === subjectFilter;
+    const matchesStatus = !statusFilter || lesson.status === statusFilter;
+    const matchesDateRange = (!dateFrom || lesson.date >= dateFrom) &&
+                             (!dateTo || lesson.date <= dateTo);
+    
+    return matchesSearch && matchesTeacher && matchesStudent && matchesGrade && 
+           matchesSubject && matchesStatus && matchesDateRange;
+  });
+
+  const getStatusColor = (status: LessonStatus): string => {
+    switch (status) {
+      case 'Scheduled': return 'bg-gray-100 text-gray-800';
+      case 'Confirmed': return 'bg-blue-100 text-blue-800';
+      case 'Completed': return 'bg-green-100 text-green-800';
+      case 'Cancelled': return 'bg-red-100 text-red-800';
+    }
+  };
+
+  const handleStatusChange = (lessonId: string, newStatus: LessonStatus) => {
+    setEditedData({
+      ...editedData,
+      [lessonId]: {
+        ...editedData[lessonId],
+        status: newStatus,
+      }
     });
   };
 
-  const formatTime = (time: string): string => {
-    if (!time) return '—';
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    return `${hour12}:${minutes} ${ampm}`;
+  const handleAlertChange = (lessonId: string, newAlert: 'ok' | 'warning') => {
+    setEditedData({
+      ...editedData,
+      [lessonId]: {
+        ...editedData[lessonId],
+        adminAlertCairo: newAlert,
+      }
+    });
   };
 
-  const getStatusColor = (status: LessonStatus, isConfirmed: boolean): string => {
-    if (!isConfirmed && status === 'Scheduled') {
-      return 'bg-orange-50 border-l-4 border-orange-400';
+  const getCellValue = (lesson: MasterLesson, field: keyof MasterLesson) => {
+    if (editedData[lesson.lessonId] && field in editedData[lesson.lessonId]) {
+      return editedData[lesson.lessonId][field];
     }
-    
-    switch (status) {
-      case 'Confirmed':
-        return 'bg-blue-50 border-l-4 border-blue-400';
-      case 'Scheduled':
-        return 'bg-gray-50 border-l-4 border-gray-400';
-      case 'Completed':
-        return 'bg-green-50 border-l-4 border-green-400';
-      case 'Cancelled':
-        return 'bg-red-50 border-l-4 border-red-400';
-      default:
-        return 'bg-white';
-    }
+    return lesson[field];
   };
 
-  const getStatusBadgeColor = (status: LessonStatus): string => {
-    switch (status) {
-      case 'Confirmed':
-        return 'bg-blue-100 text-blue-800';
-      case 'Scheduled':
-        return 'bg-gray-100 text-gray-800';
-      case 'Completed':
-        return 'bg-green-100 text-green-800';
-      case 'Cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const hasChanges = Object.keys(editedData).length > 0;
 
-  // Filter lessons
-  const filteredLessons = lessons.filter(lesson => {
-    // Search filter
-    const searchLower = searchQuery.toLowerCase();
-    const matchesSearch = 
-      lesson.id.toLowerCase().includes(searchLower) ||
-      lesson.studentName.toLowerCase().includes(searchLower) ||
-      lesson.teacherName.toLowerCase().includes(searchLower) ||
-      lesson.subject.toLowerCase().includes(searchLower);
-    
-    if (!matchesSearch) return false;
-
-    // Teacher filter
-    if (selectedTeacher && lesson.teacherId !== selectedTeacher) return false;
-
-    // Status filter
-    if (selectedStatus && lesson.status !== selectedStatus) return false;
-
-    // Confirmed filter
-    if (selectedConfirmed === 'confirmed' && !lesson.isConfirmed) return false;
-    if (selectedConfirmed === 'unconfirmed' && lesson.isConfirmed) return false;
-
-    // Date range filter
-    const lessonDate = viewTimezone === 'PH' ? lesson.datePH : lesson.dateCA;
-    if (dateFrom && lessonDate < dateFrom) return false;
-    if (dateTo && lessonDate > dateTo) return false;
-
-    // Day filter
-    if (selectedDay) {
-      const lessonDay = getDayOfWeek(lessonDate);
-      if (lessonDay !== selectedDay) return false;
-    }
-
-    return true;
-  });
-
-  const handleConfirmationToggle = (lessonId: string) => {
+  const handleSave = () => {
     setLessons(prev => prev.map(lesson => {
-      if (lesson.id === lessonId) {
-        const newIsConfirmed = !lesson.isConfirmed;
-        return {
-          ...lesson,
-          isConfirmed: newIsConfirmed,
-          confirmedBy: newIsConfirmed ? 'Admin User' : '',
-          confirmedDate: newIsConfirmed ? new Date().toISOString().split('T')[0] : '',
-          hasChanges: true
-        };
+      if (editedData[lesson.lessonId]) {
+        return { ...lesson, ...editedData[lesson.lessonId] };
       }
       return lesson;
     }));
-  };
-
-  const handleSave = () => {
-    setShowSaveModal(true);
-  };
-
-  const confirmSave = () => {
-    console.log('Saving changes:', lessons.filter(l => l.hasChanges));
-    setLessons(prev => prev.map(l => ({ ...l, hasChanges: false })));
-    setShowSaveModal(false);
+    setEditedData({});
   };
 
   const handleDiscard = () => {
-    setLessons(initialLessons);
+    setEditedData({});
   };
 
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-[1800px] mx-auto">
+      <div className="max-w-full mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -336,32 +268,42 @@ export function MasterSchedule() {
               <Calendar className="size-6 text-blue-600" />
               <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Master Schedule</h1>
             </div>
-            <p className="text-gray-600">Main working table for teachers and administrators</p>
+            <p className="text-gray-600">Primary working table for teachers and administrators</p>
           </div>
 
-          {/* Timezone Toggle */}
+          {/* Time View Toggle */}
           <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg p-2 shadow-sm">
             <Globe className="size-5 text-gray-600" />
             <div className="flex rounded-md overflow-hidden border border-gray-300">
               <button
-                onClick={() => setViewTimezone('PH')}
+                onClick={() => setTimeView('student')}
                 className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  viewTimezone === 'PH'
+                  timeView === 'student'
                     ? 'bg-blue-600 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                Philippines Time
+                Student Time
               </button>
               <button
-                onClick={() => setViewTimezone('CA')}
+                onClick={() => setTimeView('teacher')}
                 className={`px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
-                  viewTimezone === 'CA'
+                  timeView === 'teacher'
                     ? 'bg-blue-600 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                Canada Time
+                Teacher Time
+              </button>
+              <button
+                onClick={() => setTimeView('cairo')}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
+                  timeView === 'cairo'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Cairo Time
               </button>
             </div>
           </div>
@@ -372,10 +314,10 @@ export function MasterSchedule() {
           <div className="flex items-start gap-3">
             <AlertCircle className="size-5 text-blue-700 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-blue-800">
-              <p className="font-medium mb-1">Editable Field: Confirmation Status</p>
+              <p className="font-medium mb-1">Operational Table - Limited Editing</p>
               <p>
-                Only the "Confirmed" status can be edited. Toggle confirmations to mark lessons as confirmed. 
-                All other fields are read-only and managed through their respective management screens.
+                Only <span className="font-semibold">Status</span> and <span className="font-semibold">Admin Alert (Cairo)</span> fields are editable. 
+                All time fields are auto-calculated based on timezones. Lessons happening today are highlighted in yellow.
               </p>
             </div>
           </div>
@@ -391,9 +333,9 @@ export function MasterSchedule() {
           </div>
           
           <div className="p-4">
-            {/* Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <div className="md:col-span-2">
+              {/* Search */}
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Search
                 </label>
@@ -403,19 +345,20 @@ export function MasterSchedule() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Lesson ID, Student, Teacher, Subject..."
+                    placeholder="Lesson ID, Student..."
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   />
                 </div>
               </div>
 
+              {/* Teacher Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Filter by Teacher
+                  Teacher
                 </label>
                 <select
-                  value={selectedTeacher}
-                  onChange={(e) => setSelectedTeacher(e.target.value)}
+                  value={teacherFilter}
+                  onChange={(e) => setTeacherFilter(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
                   <option value="">All Teachers</option>
@@ -425,25 +368,75 @@ export function MasterSchedule() {
                 </select>
               </div>
 
+              {/* Student Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Filter by Day
+                  Student
+                </label>
+                <input
+                  type="text"
+                  value={studentFilter}
+                  onChange={(e) => setStudentFilter(e.target.value)}
+                  placeholder="ID or Name..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+
+              {/* Grade Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Grade
                 </label>
                 <select
-                  value={selectedDay}
-                  onChange={(e) => setSelectedDay(e.target.value)}
+                  value={gradeFilter}
+                  onChange={(e) => setGradeFilter(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
-                  <option value="">All Days</option>
-                  {days.map(day => (
-                    <option key={day} value={day}>{day}</option>
+                  <option value="">All Grades</option>
+                  {grades.map(grade => (
+                    <option key={grade} value={grade}>{grade}</option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* Row 2 */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Subject Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Subject
+                </label>
+                <select
+                  value={subjectFilter}
+                  onChange={(e) => setSubjectFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                >
+                  <option value="">All Subjects</option>
+                  {subjects.map(subject => (
+                    <option key={subject} value={subject}>{subject}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                >
+                  <option value="">All Status</option>
+                  <option value="Scheduled">Scheduled</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              {/* Date From */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Date From
@@ -456,6 +449,7 @@ export function MasterSchedule() {
                 />
               </div>
 
+              {/* Date To */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Date To
@@ -467,38 +461,6 @@ export function MasterSchedule() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Filter by Status
-                </label>
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="">All Status</option>
-                  <option value="Scheduled">Scheduled</option>
-                  <option value="Confirmed">Confirmed</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Filter by Confirmed
-                </label>
-                <select
-                  value={selectedConfirmed}
-                  onChange={(e) => setSelectedConfirmed(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="">All</option>
-                  <option value="confirmed">Confirmed Only</option>
-                  <option value="unconfirmed">Unconfirmed Only</option>
-                </select>
-              </div>
             </div>
           </div>
         </div>
@@ -506,12 +468,11 @@ export function MasterSchedule() {
         {/* Results Count */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-gray-600">
-            Showing <span className="font-semibold text-gray-900">{filteredLessons.length}</span> of{' '}
-            <span className="font-semibold text-gray-900">{lessons.length}</span> lessons
+            Showing <span className="font-semibold text-gray-900">{filteredLessons.length}</span> lessons
           </p>
           <div className="text-sm text-gray-600">
-            Viewing in <span className="font-semibold text-blue-600">
-              {viewTimezone === 'PH' ? 'Philippines Time' : 'Canada Time'}
+            Viewing: <span className="font-semibold text-blue-600">
+              {timeView === 'student' ? 'Student Time' : timeView === 'teacher' ? 'Teacher Time' : 'Cairo Time'}
             </span>
           </div>
         </div>
@@ -519,125 +480,259 @@ export function MasterSchedule() {
         {/* Master Schedule Table */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-20">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 sticky top-0 z-10">
+            <table className="w-full min-w-max">
+              <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Lesson ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Student Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Teacher Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Subject</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">
-                    {viewTimezone === 'PH' ? 'Date (PH)' : 'Date (CA)'}
+                  {/* Frozen Columns */}
+                  <th className="sticky left-0 bg-gray-50 z-20 text-left px-4 py-3 text-xs font-medium text-gray-700 border-r border-gray-200 min-w-[110px]">
+                    <div>Date</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">التاريخ</div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Start Time</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Status</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Confirmed</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Confirmed By</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Confirmed Date</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Actions</th>
+                  <th className="sticky left-[110px] bg-gray-50 z-20 text-left px-4 py-3 text-xs font-medium text-gray-700 border-r border-gray-200 min-w-[100px]">
+                    <div>Day</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">اليوم</div>
+                  </th>
+                  <th className="sticky left-[210px] bg-gray-50 z-20 text-left px-4 py-3 text-xs font-medium text-gray-700 border-r border-gray-200 min-w-[120px]">
+                    <div>Student ID</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">رقم الطالب</div>
+                  </th>
+                  <th className="sticky left-[330px] bg-gray-50 z-20 text-left px-4 py-3 text-xs font-medium text-gray-700 border-r-2 border-gray-300 min-w-[150px]">
+                    <div>Student Name</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">اسم الطالب</div>
+                  </th>
+
+                  {/* Scrollable Columns */}
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[100px]">
+                    <div>Grade</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">المرحلة</div>
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[140px]">
+                    <div>Subject</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">المادة</div>
+                  </th>
+
+                  {/* Student Time Group */}
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-700 bg-blue-50 min-w-[100px]">
+                    <div>Start Student</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">بداية الطالب</div>
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-700 bg-blue-50 min-w-[100px]">
+                    <div>End Student</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">نهاية الطالب</div>
+                  </th>
+
+                  {/* Teacher Time Group */}
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-700 bg-purple-50 min-w-[100px]">
+                    <div>Start Teacher</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">بداية المعلم</div>
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-700 bg-purple-50 min-w-[100px]">
+                    <div>End Teacher</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">نهاية المعلم</div>
+                  </th>
+
+                  {/* Timezone Info */}
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[90px]">
+                    <div>Student TZ</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">فرق الطالب</div>
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[90px]">
+                    <div>Teacher TZ</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">فرق المعلم</div>
+                  </th>
+
+                  {/* Actual Time */}
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-700 bg-green-50 min-w-[150px]">
+                    <div>Actual Student Time</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">وقت الطالب الفعلي</div>
+                  </th>
+
+                  {/* Cairo Monitoring Group */}
+                  <th className="text-center px-4 py-3 text-xs font-medium text-gray-700 bg-orange-50 min-w-[130px]">
+                    <div>Admin Alert Cairo</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">تنبيه القاهرة</div>
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-700 bg-orange-50 min-w-[110px]">
+                    <div>Cairo Time</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">توقيت القاهرة</div>
+                  </th>
+
+                  {/* Status & IDs */}
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[120px]">
+                    <div>Status</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">الحالة</div>
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[120px]">
+                    <div>Lesson ID</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">معرف الحصة</div>
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[110px]">
+                    <div>Teacher ID</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">رقم المعلم</div>
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[150px]">
+                    <div>Teacher Name</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">اسم المعلم</div>
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-700 min-w-[130px]">
+                    <div>Teacher Country</div>
+                    <div className="text-[10px] text-gray-500 font-normal mt-0.5">دولة المعلم</div>
+                  </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredLessons.map(lesson => (
-                  <tr 
-                    key={lesson.id} 
-                    className={`transition-colors ${getStatusColor(lesson.status, lesson.isConfirmed)} ${
-                      lesson.hasChanges ? 'ring-2 ring-yellow-400' : ''
-                    }`}
-                  >
-                    {/* Lesson ID */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="font-mono text-sm text-gray-900 font-medium">{lesson.id}</span>
-                    </td>
+              <tbody className="divide-y divide-gray-200">
+                {filteredLessons.map(lesson => {
+                  const isTodayLesson = isToday(lesson.date);
+                  const isUpcomingLesson = isUpcoming(lesson.date, lesson.startStudent);
+                  const hasEdits = !!editedData[lesson.lessonId];
+                  
+                  return (
+                    <tr 
+                      key={lesson.lessonId} 
+                      className={`transition-colors ${
+                        hasEdits ? 'bg-blue-50 ring-2 ring-blue-400' :
+                        isTodayLesson ? 'bg-yellow-50' :
+                        'hover:bg-gray-50'
+                      }`}
+                    >
+                      {/* Date - Frozen */}
+                      <td className="sticky left-0 bg-white px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
+                        {lesson.date}
+                      </td>
 
-                    {/* Student Name */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <User className="size-4 text-gray-400" />
-                        <span className="text-sm text-gray-900 font-medium">{lesson.studentName}</span>
-                      </div>
-                    </td>
+                      {/* Day - Frozen */}
+                      <td className="sticky left-[110px] bg-white px-4 py-3 text-sm text-gray-700 border-r border-gray-200">
+                        {lesson.day}
+                      </td>
 
-                    {/* Teacher Name */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">{lesson.teacherName}</span>
-                    </td>
+                      {/* Student ID - Frozen */}
+                      <td className="sticky left-[210px] bg-white px-4 py-3 text-sm font-mono text-gray-900 border-r border-gray-200">
+                        {lesson.studentId}
+                      </td>
 
-                    {/* Subject */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="size-4 text-gray-400" />
-                        <span className="text-sm text-gray-700">{lesson.subject}</span>
-                      </div>
-                    </td>
+                      {/* Student Name - Frozen */}
+                      <td className="sticky left-[330px] bg-white px-4 py-3 text-sm font-medium text-gray-900 border-r-2 border-gray-300">
+                        {lesson.studentName}
+                        {isTodayLesson && (
+                          <span className="ml-2 px-2 py-0.5 bg-yellow-200 text-yellow-800 text-xs rounded-full font-semibold">TODAY</span>
+                        )}
+                      </td>
 
-                    {/* Date */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-gray-900 font-medium">
-                          {formatDate(viewTimezone === 'PH' ? lesson.datePH : lesson.dateCA)}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {getDayOfWeek(viewTimezone === 'PH' ? lesson.datePH : lesson.dateCA)}
-                        </span>
-                      </div>
-                    </td>
+                      {/* Grade */}
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        {lesson.grade}
+                      </td>
 
-                    {/* Start Time */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center gap-1 text-sm text-gray-900 font-medium">
-                        <Clock className="size-4 text-gray-400" />
-                        {formatTime(lesson.startTime)}
-                      </div>
-                    </td>
+                      {/* Subject */}
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        {lesson.subject}
+                      </td>
 
-                    {/* Status */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(lesson.status)}`}>
-                        {lesson.status}
-                      </span>
-                    </td>
+                      {/* Start Student */}
+                      <td className="px-4 py-3 text-sm font-mono text-gray-900 bg-blue-50 text-right">
+                        {lesson.startStudent}
+                      </td>
 
-                    {/* Is Confirmed - EDITABLE */}
-                    <td className="px-4 py-3 whitespace-nowrap text-center">
-                      <button
-                        onClick={() => handleConfirmationToggle(lesson.id)}
-                        className={`relative inline-flex items-center h-6 w-11 rounded-full transition-colors ${
-                          lesson.isConfirmed ? 'bg-blue-600' : 'bg-gray-300'
-                        }`}
-                        title="Toggle confirmation"
-                      >
-                        <span
-                          className={`inline-block size-4 transform rounded-full bg-white transition-transform ${
-                            lesson.isConfirmed ? 'translate-x-6' : 'translate-x-1'
+                      {/* End Student */}
+                      <td className="px-4 py-3 text-sm font-mono text-gray-900 bg-blue-50 text-right">
+                        {lesson.endStudent}
+                      </td>
+
+                      {/* Start Teacher */}
+                      <td className="px-4 py-3 text-sm font-mono text-gray-900 bg-purple-50 text-right">
+                        {lesson.startTeacher}
+                      </td>
+
+                      {/* End Teacher */}
+                      <td className="px-4 py-3 text-sm font-mono text-gray-900 bg-purple-50 text-right">
+                        {lesson.endTeacher}
+                      </td>
+
+                      {/* Student TZ */}
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {lesson.studentTZ}
+                      </td>
+
+                      {/* Teacher TZ */}
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {lesson.teacherTZ}
+                      </td>
+
+                      {/* Actual Student Time */}
+                      <td className="px-4 py-3 text-sm font-mono text-gray-900 bg-green-50 text-right">
+                        {lesson.actualStudentTime}
+                      </td>
+
+                      {/* Admin Alert Cairo - EDITABLE */}
+                      <td className="px-4 py-3 text-sm bg-orange-50 text-center">
+                        <button
+                          onClick={() => handleAlertChange(
+                            lesson.lessonId, 
+                            getCellValue(lesson, 'adminAlertCairo') === 'ok' ? 'warning' : 'ok'
+                          )}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                            getCellValue(lesson, 'adminAlertCairo') === 'ok'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-orange-200 text-orange-900'
                           }`}
-                        />
-                      </button>
-                    </td>
+                        >
+                          {getCellValue(lesson, 'adminAlertCairo') === 'ok' ? (
+                            <>
+                              <Clock className="size-3" />
+                              OK
+                            </>
+                          ) : (
+                            <>
+                              <Bell className="size-3" />
+                              Alert
+                            </>
+                          )}
+                        </button>
+                      </td>
 
-                    {/* Confirmed By */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-sm text-gray-700">{lesson.confirmedBy || '—'}</span>
-                    </td>
+                      {/* Cairo Time */}
+                      <td className="px-4 py-3 text-sm font-mono text-gray-900 bg-orange-50 text-right">
+                        {lesson.cairoTime}
+                      </td>
 
-                    {/* Confirmed Date */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-sm text-gray-700">
-                        {lesson.confirmedDate ? formatDate(lesson.confirmedDate) : '—'}
-                      </span>
-                    </td>
+                      {/* Status - EDITABLE */}
+                      <td className="px-4 py-3 text-sm">
+                        <select
+                          value={getCellValue(lesson, 'status') as LessonStatus}
+                          onChange={(e) => handleStatusChange(lesson.lessonId, e.target.value as LessonStatus)}
+                          className={`px-2.5 py-1 rounded-full text-xs font-semibold border-0 cursor-pointer ${
+                            getStatusColor(getCellValue(lesson, 'status') as LessonStatus)
+                          }`}
+                        >
+                          <option value="Scheduled">Scheduled</option>
+                          <option value="Confirmed">Confirmed</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Cancelled">Cancelled</option>
+                        </select>
+                      </td>
 
-                    {/* Actions */}
-                    <td className="px-4 py-3 whitespace-nowrap text-center">
-                      <button
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        title="View Details"
-                      >
-                        <Eye className="size-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      {/* Lesson ID */}
+                      <td className="px-4 py-3 text-sm font-mono text-gray-900">
+                        {lesson.lessonId}
+                      </td>
+
+                      {/* Teacher ID */}
+                      <td className="px-4 py-3 text-sm font-mono text-gray-700">
+                        {lesson.teacherId}
+                      </td>
+
+                      {/* Teacher Name */}
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        {lesson.teacherName}
+                      </td>
+
+                      {/* Teacher Country */}
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        {lesson.teacherCountry}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
 
@@ -654,113 +749,69 @@ export function MasterSchedule() {
           {/* Legend */}
           <div className="border-t border-gray-200 bg-gray-50 px-4 py-3">
             <div className="flex flex-wrap items-center gap-6 text-xs">
-              <p className="font-medium text-gray-700 mr-2">Visual Indicators:</p>
+              <p className="font-medium text-gray-700 mr-2">Visual Groups:</p>
               <div className="flex items-center gap-2">
-                <div className="size-4 bg-blue-50 border-l-4 border-blue-400 rounded"></div>
-                <span className="text-gray-600">Confirmed</span>
+                <div className="size-4 bg-blue-50 border border-blue-200 rounded"></div>
+                <span className="text-gray-600">Student Time</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="size-4 bg-gray-50 border-l-4 border-gray-400 rounded"></div>
-                <span className="text-gray-600">Scheduled</span>
+                <div className="size-4 bg-purple-50 border border-purple-200 rounded"></div>
+                <span className="text-gray-600">Teacher Time</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="size-4 bg-green-50 border-l-4 border-green-400 rounded"></div>
-                <span className="text-gray-600">Completed</span>
+                <div className="size-4 bg-green-50 border border-green-200 rounded"></div>
+                <span className="text-gray-600">Actual Time</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="size-4 bg-red-50 border-l-4 border-red-400 rounded"></div>
-                <span className="text-gray-600">Cancelled</span>
+                <div className="size-4 bg-orange-50 border border-orange-200 rounded"></div>
+                <span className="text-gray-600">Cairo Monitoring</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="size-4 bg-orange-50 border-l-4 border-orange-400 rounded"></div>
-                <span className="text-gray-600">Unconfirmed</span>
+                <div className="size-4 bg-yellow-50 border border-yellow-200 rounded"></div>
+                <span className="text-gray-600">Today's Lessons</span>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Sticky Action Bar */}
-        {hasChanges && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-yellow-400 shadow-lg z-50">
-            <div className="max-w-[1800px] mx-auto px-4 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="size-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <AlertCircle className="size-5 text-yellow-700" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Unsaved Changes</p>
-                    <p className="text-sm text-gray-600">
-                      You have modified {lessons.filter(l => l.hasChanges).length} lesson{lessons.filter(l => l.hasChanges).length !== 1 ? 's' : ''}
-                    </p>
-                  </div>
+      {/* Sticky Action Bar */}
+      {hasChanges && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-blue-400 shadow-lg z-50">
+          <div className="max-w-full mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="size-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <AlertCircle className="size-5 text-blue-700" />
                 </div>
-                
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleDiscard}
-                    className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
-                  >
-                    <XIcon className="size-4" />
-                    Discard
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
-                  >
-                    <Save className="size-4" />
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Save Confirmation Modal */}
-        {showSaveModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="size-12 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <AlertCircle className="size-6 text-yellow-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-lg">Confirm Save Changes</h3>
-                  </div>
-                </div>
-                
-                <p className="text-gray-700 mb-6">
-                  Save confirmation status changes? This will update the master schedule records.
-                </p>
-                
-                <div className="bg-gray-50 rounded-lg p-3 mb-6">
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">{lessons.filter(l => l.hasChanges).length}</span> lesson{lessons.filter(l => l.hasChanges).length !== 1 ? 's' : ''} will be updated
+                <div>
+                  <p className="font-semibold text-gray-900">Unsaved Changes</p>
+                  <p className="text-sm text-gray-600">
+                    You have modified {Object.keys(editedData).length} lesson{Object.keys(editedData).length !== 1 ? 's' : ''}
                   </p>
                 </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowSaveModal(false)}
-                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmSave}
-                    className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
-                  >
-                    <CheckCircle className="size-4" />
-                    Confirm Save
-                  </button>
-                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleDiscard}
+                  className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
+                >
+                  <XIcon className="size-4" />
+                  Discard
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 shadow-sm"
+                >
+                  <Save className="size-4" />
+                  Save Changes
+                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

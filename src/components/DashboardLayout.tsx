@@ -17,7 +17,8 @@ import {
   Clock,
   UserCheck,
   CreditCard,
-  CalendarCheck
+  CalendarCheck,
+  XCircle
 } from 'lucide-react';
 
 type NavItem = {
@@ -60,9 +61,10 @@ export function DashboardLayout() {
         { number: '8', name: 'Lesson Schedule', path: '/schedule', icon: BookOpen },
         { number: '9', name: 'Master Schedule', path: '/master-schedule', icon: CalendarCheck },
         { number: '10', name: 'Completed Lessons', path: '/lessons/completed', icon: CheckCircle },
-        { number: '11', name: 'Payments', path: '/payments', icon: Receipt },
-        { number: '12', name: 'Finance', path: '/finance', icon: DollarSign },
-        { number: '13', name: 'Diagnostics', path: '/diagnostics', icon: Activity },
+        { number: '11', name: 'Canceled Lessons', path: '/lessons/canceled', icon: XCircle },
+        { number: '12', name: 'Payments', path: '/payments', icon: Receipt },
+        { number: '13', name: 'Finance', path: '/finance', icon: DollarSign },
+        { number: '14', name: 'Diagnostics', path: '/diagnostics', icon: Activity },
       ]
     }
   ];
